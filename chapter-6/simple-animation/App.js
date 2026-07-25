@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   Animated,
   Easing,
@@ -12,40 +12,31 @@ const cloudImage = require('./assets/images/cloud.png');
 const imageHeight = 200;
 const imageWidth = 300;
 
-export default class MainApp extends Component {
-  componentWillMount() {
-    this.animatedValue = new Animated.Value();
-  }
+export default function App() {
+  const animatedValue = useRef(new Animated.Value(width)).current;
 
-  componentDidMount() {
-    this.startAnimation();
-  }
+  const startAnimation = () => {
+    animatedValue.setValue(width);
+    Animated.timing(animatedValue, {
+      toValue: -imageWidth,
+      duration: 6000,
+      easing: Easing.linear,
+      useNativeDriver: false,
+    }).start(() => startAnimation());
+  };
 
-  startAnimation() {
-    this.animatedValue.setValue(width);
-    Animated.timing(
-      this.animatedValue,
-      {
-        toValue: -imageWidth,
-        duration: 6000,
-        easing: Easing.linear,
-      }
-    ).start(() => this.startAnimation());
-  }
+  useEffect(() => {
+    startAnimation();
+  }, []);
 
-  render() {
-    return (
-      <View style={styles.background}>
-        <Animated.Image
-          style={[
-            styles.image,
-            { left: this.animatedValue },
-          ]}
-          source={cloudImage}
-        />
-      </View>
-    );
-  }
+  return (
+    <View style={styles.background}>
+      <Animated.Image
+        style={[styles.image, { left: animatedValue }]}
+        source={cloudImage}
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

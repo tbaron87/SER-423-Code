@@ -1,45 +1,37 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Text,
   StyleSheet,
   View,
   SafeAreaView,
   Platform,
-  UIManager
+  UIManager,
 } from 'react-native';
 import Button from './Button';
 
-export default class App extends Component {
-  state = {
-    loading: false,
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+export default function App() {
+  const [loading, setLoading] = useState(false);
+
+  const handleButtonPress = (isLoading) => {
+    setLoading(isLoading);
   };
 
-  componentWillMount() {
-    if (Platform.OS === 'android') {
-      UIManager.setLayoutAnimationEnabledExperimental(true);
-    }
-  }
-
-  handleButtonPress = (loading) => {
-    this.setState({ loading });
-  }
-
-  render() {
-    const { loading } = this.state;
-
-    return (
-      <SafeAreaView style={styles.main}>
-        <Text style={styles.toolbar}>Animated containers</Text>
-        <View style={styles.content}>
-          <Button
-            label="Login"
-            loading={loading}
-            onPress={this.handleButtonPress}
-          />
-        </View>
-      </SafeAreaView>
-    );
-  }
+  return (
+    <SafeAreaView style={styles.main}>
+      <Text style={styles.toolbar}>Animated containers</Text>
+      <View style={styles.content}>
+        <Button
+          label="Login"
+          loading={loading}
+          onPress={handleButtonPress}
+        />
+      </View>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({

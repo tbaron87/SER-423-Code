@@ -1,44 +1,30 @@
-import React from 'react';
-import {
-  Dimensions,
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
-
+import { useState, useEffect } from 'react';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import Menu from './Menu';
 
-export default class App extends React.Component {
-  handleLayoutChange() {
-    this.getOrientation();
-  }
+export default function App() {
+  const [orientation, setOrientation] = useState(getOrientation());
 
-  componentWillMount() {
-    this.getOrientation();
-  }
-
-  getOrientation() {
+  function getOrientation() {
     const { width, height } = Dimensions.get('window');
-    let orientation = height > width ? 'Portrait' : 'Landscape';
-    console.log(orientation);
-    this.setState({
-      orientation
-    });
+    return height > width ? 'Portrait' : 'Landscape';
   }
 
-  render() {
-    return (
-      <View
-        onLayout={() => {this.handleLayoutChange()}}
-        style={styles.container}
-      >
-        <Menu orientation={this.state.orientation} />
-        <View style={styles.main}>
-          <Text>Main Content</Text>
-        </View>
+  const handleLayoutChange = () => {
+    setOrientation(getOrientation());
+  };
+
+  return (
+    <View
+      onLayout={handleLayoutChange}
+      style={styles.container}
+    >
+      <Menu orientation={orientation} />
+      <View style={styles.main}>
+        <Text>Main Content</Text>
       </View>
-    );
-  }
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -51,5 +37,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#ecf0f1',
     justifyContent: 'center',
     alignItems: 'center',
-  }
+  },
 });

@@ -1,56 +1,35 @@
-import React, { Component } from 'react';
-import {
-  StyleSheet,
-  View,
-  ListView,
-  Image,
-  Text,
-} from 'react-native';
+import { StyleSheet, View, FlatList, Image, Text } from 'react-native';
 import data from './sales.json';
 
 const basketIcon = require('./images/basket.png');
 
-export default class App extends React.Component {
-  constructor(props) {
-    super(props);
-    const dataSource = new ListView.DataSource({
-      rowHasChanged: (r1, r2) => r1 !== r2
-    });
-
-    this.state = {
-      dataSource: dataSource.cloneWithRows(data),
-    };
-  }
-
-  renderRow(record) {
-    return (
-      <View style={styles.row}>
-        <View style={styles.iconContainer}>
-          <Image source={basketIcon} style={styles.icon} />
-        </View>
-        <View style={styles.info}>
-          <Text style={styles.items}>{record.items} Items</Text>
-          <Text style={styles.address}>{record.address}</Text>
-        </View>
-        <View style={styles.total}>
-          <Text style={styles.date}>{record.date}</Text>
-          <Text style={styles.price}>${record.total}</Text>
-        </View>
+export default function App() {
+  const renderItem = ({ item }) => (
+    <View style={styles.row}>
+      <View style={styles.iconContainer}>
+        <Image source={basketIcon} style={styles.icon} />
       </View>
-    );
-  }
-
-  render() {
-    return (
-      <View style={styles.mainContainer}>
-        <Text style={styles.title}>Sales</Text>
-        <ListView
-          dataSource={this.state.dataSource}
-          renderRow={this.renderRow}
-        />
+      <View style={styles.info}>
+        <Text style={styles.items}>{item.items} Items</Text>
+        <Text style={styles.address}>{item.address}</Text>
       </View>
-    );
-  }
+      <View style={styles.total}>
+        <Text style={styles.date}>{item.date}</Text>
+        <Text style={styles.price}>${item.total}</Text>
+      </View>
+    </View>
+  );
+
+  return (
+    <View style={styles.mainContainer}>
+      <Text style={styles.title}>Sales</Text>
+      <FlatList
+        data={data}
+        keyExtractor={(item, index) => String(index)}
+        renderItem={renderItem}
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -110,11 +89,11 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 12,
-    marginBottom: 5,
+    color: '#ccc',
   },
   price: {
-    color: '#1cad61',
-    fontSize: 25,
+    fontSize: 16,
     fontWeight: 'bold',
-  }
+    color: '#1cad61',
+  },
 });

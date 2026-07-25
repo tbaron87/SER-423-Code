@@ -1,61 +1,37 @@
-import React, { Component } from 'react';
-import {
-  SafeAreaView,
-  NetInfo,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { useState, useEffect } from 'react';
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 
-export default class App extends Component {
-  state = {
-    online: null,
-    offline: null,
-  };
+export default function App() {
+  const [online, setOnline] = useState(true);
 
-  componentWillMount() {
-    NetInfo.getConnectionInfo().then((connectionInfo) => {
-      this.onConnectivityChange(connectionInfo);
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setOnline(state.isConnected);
     });
-    NetInfo.addEventListener('connectionChange', this.onConnectivityChange);
-  }
 
-  componentWillUnmount() {
-    NetInfo.removeEventListener('connectionChange', this.onConnectivityChange);
-  }
+    return () => unsubscribe();
+  }, []);
 
-  onConnectivityChange = connectionInfo => {
-    this.setState({
-      online: connectionInfo.type !== 'none',
-      offline: connectionInfo.type === 'none',
-    });
-  }
-
-  renderMask() {
-    if (this.state.offline) {
-      return (
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.toolbar}>My Awesome App</Text>
+      <Text style={styles.text}>Lorem...</Text>
+      <Text style={styles.text}>Lorem ipsum...</Text>
+      {!online ? (
         <View style={styles.mask}>
           <View style={styles.msg}>
-            <Text style={styles.alert}>Seems like you do not have
-             network connection anymore.</Text>
-            <Text style={styles.alert}>You can still continue
-            using the app, with limited content.</Text>
+            <Text style={styles.alert}>
+              Seems like you do not have network connection anymore.
+            </Text>
+            <Text style={styles.alert}>
+              You can still continue using the app, with limited content.
+            </Text>
           </View>
         </View>
-      );
-    }
-  }
-
-  render() {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.toolbar}>My Awesome App</Text>
-        <Text style={styles.text}>Lorem...</Text>
-        <Text style={styles.text}>Lorem ipsum...</Text>
-        {this.renderMask()}
-      </SafeAreaView>
-    );
-  }
+      ) : null}
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -95,5 +71,5 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
     margin: 5,
-  }
+  },
 });

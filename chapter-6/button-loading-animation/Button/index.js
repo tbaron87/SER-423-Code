@@ -1,4 +1,3 @@
-import React, { Component } from 'react';
 import {
   ActivityIndicator,
   LayoutAnimation,
@@ -8,56 +7,24 @@ import {
   View,
 } from 'react-native';
 
-export default class Button extends Component {
-  static defaultProps = {
-    loading: false,
-    onPress: () => {},
-  };
-
-  renderLabel() {
-    const { label, loading } = this.props;
-    if(!loading) {
-      return (
-        <Text style={styles.label}>{label}</Text>
-      );
-    }
-  }
-
-  renderActivityIndicator() {
-    if (this.props.loading) {
-      return (
-        <ActivityIndicator size="small" color="#fff" />
-      );
-    }
-  }
-
-  handleButtonPress = () => {
-    const { loading, onPress } = this.props;
-
+export default function Button({ label, loading = false, onPress = () => {}, style }) {
+  const handleButtonPress = () => {
     LayoutAnimation.easeInEaseOut();
     onPress(!loading);
-  }
+  };
 
-  render() {
-    const { loading, style } = this.props;
-
-    return (
-      <TouchableOpacity
-        style={[
-          styles.main,
-          style,
-          loading ? styles.loading : null,
-        ]}
-        activeOpacity={0.6}
-        onPress={this.handleButtonPress}
-      >
-        <View>
-          {this.renderLabel()}
-          {this.renderActivityIndicator()}
-        </View>
-      </TouchableOpacity>
-    );
-  }
+  return (
+    <TouchableOpacity
+      style={[styles.main, style, loading ? styles.loading : null]}
+      activeOpacity={0.6}
+      onPress={handleButtonPress}
+    >
+      <View>
+        {!loading ? <Text style={styles.label}>{label}</Text> : null}
+        {loading ? <ActivityIndicator size="small" color="#fff" /> : null}
+      </View>
+    </TouchableOpacity>
+  );
 }
 
 const styles = StyleSheet.create({

@@ -1,29 +1,25 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import { Button, Text, View, StyleSheet } from 'react-native';
-import { Constants, WebBrowser } from 'expo';
+import Constants from 'expo-constants';
+import * as WebBrowser from 'expo-web-browser';
 
-export default class App extends Component {
-  state = {
-    result: null,
+export default function App() {
+  const [result, setResult] = useState(null);
+
+  const handlePressButton = async () => {
+    const browserResult = await WebBrowser.openBrowserAsync('https://expo.dev');
+    setResult(browserResult);
   };
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <Button
-          style={styles.paragraph}
-          title="Open WebBrowser"
-          onPress={this._handlePressButtonAsync}
-        />
-        <Text>{this.state.result && JSON.stringify(this.state.result)}</Text>
-      </View>
-    );
-  }
-
-  _handlePressButtonAsync = async () => {
-    let result = await WebBrowser.openBrowserAsync('https://expo.io');
-    this.setState({ result });
-  };
+  return (
+    <View style={styles.container}>
+      <Button
+        title="Open WebBrowser"
+        onPress={handlePressButton}
+      />
+      <Text>{result && JSON.stringify(result)}</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

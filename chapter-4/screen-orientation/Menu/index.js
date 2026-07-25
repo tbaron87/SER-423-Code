@@ -1,40 +1,28 @@
-import React, { Component } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 
-export default class Menu extends Component {
-  state = {
-    options: [
-      {title: 'Dashboard', icon: 'dashboard'},
-      {title: 'Inbox', icon: 'inbox'},
-      {title: 'Graphs', icon: 'pie-chart'},
-      {title: 'Search', icon: 'search'},
-      {title: 'Settings', icon: 'gear'},
-    ],
-  };
+const options = [
+  { title: 'Dashboard', icon: 'dashboard' },
+  { title: 'Inbox', icon: 'inbox' },
+  { title: 'Graphs', icon: 'pie-chart' },
+  { title: 'Search', icon: 'search' },
+  { title: 'Settings', icon: 'gear' },
+];
 
-  renderOption = (option, index) => {
-    const isLandscape = this.props.orientation === 'Landscape';
-    const title = isLandscape
-      ? <Text style={styles.title}>{option.title}</Text>
-      : null;
-    const iconSize = isLandscape ? 27 : 35;
+export default function Menu({ orientation }) {
+  const isLandscape = orientation === 'Landscape';
+  const iconSize = isLandscape ? 27 : 35;
 
-    return (
-      <View key={index} style={[styles.option, styles.landscape]}>
-        <FontAwesome name={option.icon} size={iconSize} color="#fff" />
-        {title}
-      </View>
-    );
-  }
-
-  render() {
-    return (
-      <View style={styles.content}>
-        {this.state.options.map(this.renderOption)}
-      </View>
-    );
-  }
+  return (
+    <View style={styles.content}>
+      {options.map((option, index) => (
+        <View key={index} style={[styles.option, styles.landscape]}>
+          <FontAwesome name={option.icon} size={iconSize} color="#fff" />
+          {isLandscape ? <Text style={styles.title}>{option.title}</Text> : null}
+        </View>
+      ))}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

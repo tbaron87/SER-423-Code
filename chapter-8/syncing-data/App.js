@@ -1,90 +1,73 @@
-import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  NetInfo,
-  TouchableOpacity
-} from 'react-native';
+import { useState, useEffect, useRef } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 
-export default class App extends React.Component {
-  pendingSync;
+export default function App() {
+  const [isConnected, setIsConnected] = useState(null);
+  const [syncStatus, setSyncStatus] = useState(null);
+  const [serverResponse, setServerResponse] = useState(null);
+  const pendingSync = useRef(null);
 
-  state = {
-    isConnected: null,
-    syncStatus: null,
-    serverResponse: null
-  }
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      const connected = state.isConnected;
+      setIsConnected(connected);
 
-  onConnectionChange = (isConnected) => {
-    this.setState({isConnected});
-    if (this.pendingSync) {
-      this.setState({syncStatus : 'Syncing'});
-      this.submitData(this.pendingSync).then(() => {
-        this.setState({syncStatus : 'Sync Complete'});
-      });
-    }
-  }
-
-  componentWillMount() {
-    NetInfo.isConnected.fetch().then(isConnected => {
-      this.setState({isConnected});
+      if (connected && pendingSync.current) {
+        setSyncStatus('Syncing');
+        submitData(pendingSync.current).then(() => {
+          setSyncStatus('Sync Complete');
+          pendingSync.current = null;
+        });
+      }
     });
-    NetInfo.isConnected.addEventListener('connectionChange', this.onConnectionChange);
-  }
 
-  submitData(requestBody) {
-    return fetch('http://jsonplaceholder.typicode.com/posts', {
-      method : 'POST',
-      body : JSON.stringify(requestBody)
-    }).then((response) => {
-      return response.text();
-    }).then((responseText) => {
-      this.setState({
-        serverResponse : responseText
-      });
+    return () => unsubscribe();
+  }, []);
+
+  const submitData = async (requestBody) => {
+    const response = await fetch('http://jsonplaceholder.typicode.com/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
     });
-  }
+    const responseText = await response.text();
+    setServerResponse(responseText);
+  };
 
-  onSubmitPress = () => {
+  const onSubmitPress = () => {
     const requestBody = {
       title: 'foo',
       body: 'bar',
-      userId: 1
+      userId: 1,
     };
-    if (this.state.isConnected) {
-      this.submitData(requestBody);
-    } else {
-      this.pendingSync = requestBody;
-      this.setState({syncStatus : 'Pending'});
-    }
-  }
 
-  render() {
-    const {
-      isConnected,
-      syncStatus,
-      serverResponse
-    } = this.state;
-    return (
-      <View style={styles.container}>
-        <TouchableOpacity onPress={this.onSubmitPress}>
-          <View style={styles.button}>
-            <Text style={styles.buttonText}>Submit Data</Text>
-          </View>
-        </TouchableOpacity>
-        <Text style={styles.status}>
-          Connection Status: {isConnected ? 'Connected' : 'Disconnected'}
-        </Text>
-        <Text style={styles.status}>
-          Sync Status: {syncStatus}
-        </Text>
-        <Text style={styles.status}>
-          Server Response: {serverResponse}
-        </Text>
-      </View>
-    );
-  }
+    if (isConnected) {
+      submitData(requestBody);
+    } else {
+      pendingSync.current = requestBody;
+      setSyncStatus('Pending');
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity onPress={onSubmitPress}>
+        <View style={styles.button}>
+          <Text style={styles.buttonText}>Submit Data</Text>
+        </View>
+      </TouchableOpacity>
+      <Text style={styles.status}>
+        Connection Status: {isConnected ? 'Connected' : 'Disconnected'}
+      </Text>
+      <Text style={styles.status}>
+        Sync Status: {syncStatus}
+      </Text>
+      <Text style={styles.status}>
+        Server Response: {serverResponse}
+      </Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -97,13 +80,13 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#3E6C7F',
     padding: 10,
-    marginBottom: 20
+    marginBottom: 20,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 18
+    fontSize: 18,
   },
   status: {
     fontSize: 20,
-  }
+  },
 });

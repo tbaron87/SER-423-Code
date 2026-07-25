@@ -1,56 +1,54 @@
-import React from 'react';
+import { useState, useCallback } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
+import * as Font from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
 
-import { Font } from 'expo';
+SplashScreen.preventAutoHideAsync();
 
-export default class App extends React.Component {
-  state = {
-    fontLoaded: false
-  };
+export default function App() {
+  const [fontsLoaded, setFontsLoaded] = useState(false);
 
-  async componentDidMount() {
-    await Font.loadAsync({
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    Font.loadAsync({
       'josefin-sans-regular': require('./assets/fonts/JosefinSans-Regular.ttf'),
       'josefin-sans-bold': require('./assets/fonts/JosefinSans-Bold.ttf'),
       'josefin-sans-italic': require('./assets/fonts/JosefinSans-Italic.ttf'),
       'raleway-regular': require('./assets/fonts/Raleway-Regular.ttf'),
       'raleway-bold': require('./assets/fonts/Raleway-Bold.ttf'),
       'raleway-italic': require('./assets/fonts/Raleway-Italic.ttf'),
-    });
+    }).then(() => setFontsLoaded(true));
 
-    this.setState({ fontLoaded: true });
+    return null;
   }
 
-  render() {
-    return (
-      <View style={styles.container}>
-        {
-          this.state.fontLoaded ? (
-            <View style={styles.container}>
-              <Text style={[styles.josefinSans, styles.textFormatting]}>
-                Hello, Josefin Sans!
-              </Text>
-              <Text style={[styles.josefinSansBold, styles.textFormatting]}>
-                Hello, Josefin Sans!
-              </Text>
-              <Text style={[styles.josefinSansItalic, styles.textFormatting]}>
-                Hello, Josefin Sans!
-              </Text>
-              <Text style={[styles.raleway, styles.textFormatting]}>
-                Hello, Raleway!
-              </Text>
-              <Text style={[styles.ralewayBold, styles.textFormatting]}>
-                Hello, Raleway!
-              </Text>
-              <Text style={[styles.ralewayItalic, styles.textFormatting]}>
-                Hello, Raleway!
-              </Text>
-            </View>
-          ) : null
-        }
-      </View>
-    );
-  }
+  return (
+    <View style={styles.container} onLayout={onLayoutRootView}>
+      <Text style={[styles.josefinSans, styles.textFormatting]}>
+        Hello, Josefin Sans!
+      </Text>
+      <Text style={[styles.josefinSansBold, styles.textFormatting]}>
+        Hello, Josefin Sans!
+      </Text>
+      <Text style={[styles.josefinSansItalic, styles.textFormatting]}>
+        Hello, Josefin Sans!
+      </Text>
+      <Text style={[styles.raleway, styles.textFormatting]}>
+        Hello, Raleway!
+      </Text>
+      <Text style={[styles.ralewayBold, styles.textFormatting]}>
+        Hello, Raleway!
+      </Text>
+      <Text style={[styles.ralewayItalic, styles.textFormatting]}>
+        Hello, Raleway!
+      </Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -73,13 +71,13 @@ const styles = StyleSheet.create({
     fontFamily: 'raleway-regular',
   },
   ralewayBold: {
-    fontFamily: 'josefin-sans-bold',
+    fontFamily: 'raleway-bold',
   },
   ralewayItalic: {
-    fontFamily: 'josefin-sans-italic',
+    fontFamily: 'raleway-italic',
   },
   textFormatting: {
     fontSize: 40,
-    paddingBottom: 20
-  }
+    paddingBottom: 20,
+  },
 });

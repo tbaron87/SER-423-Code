@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import {
   View,
   LayoutAnimation,
@@ -7,39 +7,24 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-export default class Panel extends Component {
-  state = {
-    height: this.props.expanded ? null : 0,
-  };
+export default function Panel({ children, style, title, expanded = false }) {
+  const [height, setHeight] = useState(expanded ? null : 0);
 
-  static defaultProps = {
-    expanded: false
-  };
-
-  toggle = () => {
+  const toggle = () => {
     LayoutAnimation.spring();
-    this.setState({
-      height: this.state.height === null ? 0 : null,
-    })
-  }
+    setHeight(height === null ? 0 : null);
+  };
 
-  render() {
-    const { children, style, title } = this.props;
-    const { height } = this.state;
-
-    return (
-      <View style={[styles.main, style]}>
-        <TouchableOpacity onPress={this.toggle}>
-          <Text style={styles.title}>
-            {title}
-          </Text>
-        </TouchableOpacity>
-        <View style={{ height }}>
-          {children}
-        </View>
+  return (
+    <View style={[styles.main, style]}>
+      <TouchableOpacity onPress={toggle}>
+        <Text style={styles.title}>{title}</Text>
+      </TouchableOpacity>
+      <View style={{ height }}>
+        {children}
       </View>
-    );
-  }
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -54,5 +39,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     paddingTop: 15,
     paddingBottom: 15,
-  }
+  },
 });

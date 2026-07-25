@@ -1,9 +1,24 @@
 {
-  "main": "node_modules/expo/AppEntry.js",
+  "name": "custom-fonts",
+  "version": "1.0.0",
+  "main": "expo/AppEntry.js",
   "private": true,
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
   "dependencies": {
-    "react-native": "https://github.com/expo/react-native/archive/sdk-31.0.0.tar.gz",
-    "expo": "^31.0.0",
-    "react": "16.5.0"
+    "expo": "~52.0.0",
+    "expo-font": "~13.0.0",
+    "expo-splash-screen": "~0.29.0",
+    "expo-status-bar": "~2.0.0",
+    "react": "18.3.1",
+    "react-native": "0.76.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.0",
+    "babel-preset-expo": "~12.0.0"
   }
 }

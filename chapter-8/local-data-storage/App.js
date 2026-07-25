@@ -1,73 +1,63 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Alert,
-  AsyncStorage,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const key = '@MyApp:key';
+const STORAGE_KEY = '@MyApp:key';
 
-export default class App extends Component {
-  state = {
-    text: '',
-    storedValue: '',
-  };
+export default function App() {
+  const [text, setText] = useState('');
+  const [storedValue, setStoredValue] = useState('');
 
-  componentWillMount() {
-    this.onLoad();
-  }
+  useEffect(() => {
+    onLoad();
+  }, []);
 
-  onLoad = async () => {
+  const onLoad = async () => {
     try {
-      const storedValue = await AsyncStorage.getItem(key);
-      this.setState({ storedValue });
+      const value = await AsyncStorage.getItem(STORAGE_KEY);
+      if (value !== null) {
+        setStoredValue(value);
+      }
     } catch (error) {
       Alert.alert('Error', 'There was an error while loading the data');
     }
-  }
+  };
 
-  onSave = async () => {
-    const { text } = this.state;
-
+  const onSave = async () => {
     try {
-      await AsyncStorage.setItem(key, text);
+      await AsyncStorage.setItem(STORAGE_KEY, text);
       Alert.alert('Saved', 'Successfully saved on device');
     } catch (error) {
       Alert.alert('Error', 'There was an error while saving the data');
     }
-  }
+  };
 
-  onChange = (text) => {
-    this.setState({ text });
-  }
-
-  render() {
-    const { storedValue, text } = this.state;
-
-    return (
-      <View style={styles.container}>
-        <Text style={styles.preview}>{storedValue}</Text>
-        <View>
-          <TextInput
-            style={styles.input}
-            onChangeText={this.onChange}
-            value={text}
-            placeholder="Type something here..."
-          />
-          <TouchableOpacity onPress={this.onSave} style={styles.button}>
-            <Text>Save locally</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={this.onLoad} style={styles.button}>
-            <Text>Load data</Text>
-          </TouchableOpacity>
-        </View>
+  return (
+    <View style={styles.container}>
+      <Text style={styles.preview}>{storedValue}</Text>
+      <View>
+        <TextInput
+          style={styles.input}
+          onChangeText={setText}
+          value={text}
+          placeholder="Type something here..."
+        />
+        <TouchableOpacity onPress={onSave} style={styles.button}>
+          <Text>Save locally</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onLoad} style={styles.button}>
+          <Text>Load data</Text>
+        </TouchableOpacity>
       </View>
-    );
-  }
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

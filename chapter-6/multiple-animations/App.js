@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   View,
   Animated,
@@ -17,61 +17,46 @@ const cloudWidth = 150;
 const planeHeight = 60;
 const planeWidth = 100;
 
-export default class App extends Component {
-  componentWillMount() {
-    this.animatedValue = new Animated.Value();
-  }
+export default function App() {
+  const animatedValue = useRef(new Animated.Value(1)).current;
 
-  componentDidMount() {
-    this.startAnimation();
-  }
+  const startAnimation = () => {
+    animatedValue.setValue(1);
+    Animated.timing(animatedValue, {
+      toValue: 0,
+      duration: 6000,
+      easing: Easing.linear,
+      useNativeDriver: false,
+    }).start(() => startAnimation());
+  };
 
-  startAnimation () {
-    this.animatedValue.setValue(1);
-    Animated.timing(
-      this.animatedValue,
-      {
-        toValue: 0,
-        duration: 6000,
-        easing: Easing.linear
-      }
-    ).start(() => this.startAnimation());
-  }
+  useEffect(() => {
+    startAnimation();
+  }, []);
 
-  render() {
-    const left1 = this.animatedValue.interpolate({
-      inputRange: [0, 1],
-      outputRange: [-cloudWidth, width],
-    });
+  const left1 = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-cloudWidth, width],
+  });
 
-    const left2 = this.animatedValue.interpolate({
-      inputRange: [0, 1],
-      outputRange: [-cloudWidth*5, width + cloudWidth*5],
-    });
+  const left2 = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-cloudWidth * 5, width + cloudWidth * 5],
+  });
 
-    return (
-      <View style={styles.background}>
-        <Animated.Image
-          style={[
-            styles.cloud1,
-            { left: left1 },
-          ]}
-          source={cloudImage1}
-        />
-        <Image
-          style={styles.plane}
-          source={planeImage}
-        />
-        <Animated.Image
-          style={[
-            styles.cloud2,
-            { left: left2 },
-          ]}
-          source={cloudImage2}
-        />
-      </View>
-    );
-  }
+  return (
+    <View style={styles.background}>
+      <Animated.Image
+        style={[styles.cloud1, { left: left1 }]}
+        source={cloudImage1}
+      />
+      <Image style={styles.plane} source={planeImage} />
+      <Animated.Image
+        style={[styles.cloud2, { left: left2 }]}
+        source={cloudImage2}
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -89,7 +74,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: cloudWidth * 1.5,
     height: cloudHeight * 1.5,
-    top: height/2,
+    top: height / 2,
   },
   plane: {
     position: 'absolute',
@@ -97,5 +82,5 @@ const styles = StyleSheet.create({
     width: planeWidth,
     top: height / 2 - planeHeight,
     left: width / 2 - planeWidth,
-  }
+  },
 });
