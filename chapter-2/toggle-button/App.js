@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -9,36 +9,30 @@ import {
 
 const heartIcon = require('./images/heart.png');
 
-export default class App extends React.Component {
-  state = {
-    liked: false,
+export default function App() {
+  const [liked, setLiked] = useState(false);
+
+  const handleButtonPress = () => {
+    setLiked(!liked);
   };
 
-  handleButtonPress = () => {
-    this.setState({
-      liked: !this.state.liked,
-    });
-  }
+  const likedStyles = liked ? styles.liked : undefined;
 
-  render() {
-    const likedStyles = this.state.liked ? styles.liked : undefined;
-
-    return (
-      <View style={styles.container}>
-        <TouchableHighlight
-          onPress={this.handleButtonPress}
-          style={styles.button}
-          underlayColor="#fefefe"
-        >
-          <Image
-            source={heartIcon}
-            style={[styles.icon, likedStyles]}
-          />
-        </TouchableHighlight>
-        <Text style={styles.text}>Do you like this app?</Text>
-      </View>
-    );
-  }
+  return (
+    <View style={styles.container}>
+      <TouchableHighlight
+        onPress={handleButtonPress}
+        style={styles.button}
+        underlayColor="#fefefe"
+      >
+        <Image
+          source={heartIcon}
+          style={[styles.icon, likedStyles]}
+        />
+      </TouchableHighlight>
+      <Text style={styles.text}>Do you like this app?</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

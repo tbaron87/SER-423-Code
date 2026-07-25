@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useRef } from 'react';
 import {
   Animated,
   Easing,
@@ -9,95 +9,72 @@ import {
   View,
 } from 'react-native';
 
-export default class ContactItem extends Component {
-  static defaultProps = {
-    onPress: () => {},
-    onRemove: () => {},
-    onDragEnd: () => {},
-    onDragStart: () => {},
-  };
+export default function ContactItem({
+  contact,
+  onPress = () => {},
+  onRemove = () => {},
+  onDragEnd = () => {},
+  onDragStart = () => {},
+}) {
+  const pan = useRef(new Animated.ValueXY()).current;
+  const rowWidth = useRef(0);
+  const threshold = useRef(0);
 
-  state = {
-    pan: new Animated.ValueXY(),
-  };
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponderCapture: (e, gesture) => Math.abs(gesture.dx) > 2,
+      onPanResponderGrant: () => onDragStart(),
+      onPanResponderMove: Animated.event([null, { dx: pan.x }], {
+        useNativeDriver: false,
+      }),
+      onPanResponderRelease: (e, gesture) => {
+        const move = rowWidth.current - Math.abs(gesture.dx);
+        let remove = false;
+        let config = { toValue: { x: 0, y: 0 }, duration: 500 };
 
-  handleShouldDrag = (e, gesture) => {
-    const { dx } = gesture;
-    return Math.abs(dx) > 2;
-  }
+        if (move < threshold.current) {
+          remove = true;
+          config = gesture.dx > 0
+            ? { toValue: { x: rowWidth.current, y: 0 }, duration: 100 }
+            : { toValue: { x: -rowWidth.current, y: 0 }, duration: 100 };
+        }
 
-  componentWillMount() {
-    this.panResponder = PanResponder.create({
-      onMoveShouldSetPanResponderCapture: this.handleShouldDrag,
-      onPanResponderMove: Animated.event(
-        [null, { dx: this.state.pan.x }]
-      ),
-      onPanResponderRelease: this.handleReleaseItem,
-      onPanResponderTerminate: this.handleReleaseItem,
-    });
-  }
+        onDragEnd();
+        Animated.spring(pan, config).start(() => {
+          if (remove) {
+            onRemove(contact);
+          }
+        });
+      },
+      onPanResponderTerminate: (e, gesture) => {
+        onDragEnd();
+        Animated.spring(pan, { toValue: { x: 0, y: 0 }, duration: 500 }).start();
+      },
+    })
+  ).current;
 
-  handleReleaseItem = (e, gesture) => {
-    const { onRemove, contact,onDragEnd } = this.props;
-    const move = this.rowWidth - Math.abs(gesture.dx);
-    let remove = false;
-    let config = {  // Animation to origin position
-      toValue: { x: 0, y: 0 },
-      duration: 500,
-    };
-
-    if (move < this.threshold) {
-      remove = true;
-      if (gesture.dx > 0) {
-        config = { // Animation to the right
-          toValue: { x: this.rowWidth, y: 0 },
-          duration: 100,
-        };
-      } else {
-        config = { // Animation to the left
-          toValue: { x: -this.rowWidth, y: 0 },
-          duration: 100,
-        };
-      }
-    }
-
-    onDragEnd();
-    Animated.spring(
-      this.state.pan,
-      config,
-    ).start(() => {
-      if (remove) {
-        onRemove(contact);
-      }
-    });
-  }
-
-  setThreshold = (event) => {
+  const setThreshold = (event) => {
     const { layout: { width } } = event.nativeEvent;
-    this.threshold = width / 3;
-    this.rowWidth = width;
-  }
+    threshold.current = width / 3;
+    rowWidth.current = width;
+  };
 
-  render() {
-    const { contact, onPress } = this.props;
-
-    return (
-      <View style={styles.row} onLayout={this.setThreshold}>
-        <Animated.View
-          style={[styles.pan, this.state.pan.getLayout()]}
-          {...this.panResponder.panHandlers}
+  return (
+    <View style={styles.row} onLayout={setThreshold}>
+      <Animated.View
+        style={[styles.pan, pan.getLayout()]}
+        {...panResponder.panHandlers}
+      >
+        <TouchableHighlight
+          style={styles.info}
+          onPress={() => onPress(contact)}
+          underlayColor="#ecf0f1"
         >
-          <TouchableHighlight
-            style={styles.info}
-            onPress={() => onPress(contact)}
-            underlayColor="#ecf0f1"
-          >
-            <Text>{contact.name}</Text>
-          </TouchableHighlight>
-        </Animated.View>
-      </View>
-    );
-  }
+          <Text>{contact.name}</Text>
+        </TouchableHighlight>
+      </Animated.View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

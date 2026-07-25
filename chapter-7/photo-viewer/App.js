@@ -1,7 +1,5 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import {
-  Dimensions,
-  Image,
   Text,
   ScrollView,
   StyleSheet,
@@ -18,61 +16,37 @@ const image4 = require('./images/04.jpg');
 const timeline = [
   { title: 'Enjoying the fireworks', image: image1 },
   { title: 'Climbing Mount Fuji', image: image2 },
-  { title: 'Check my last picture', image:  image3 },
+  { title: 'Check my last picture', image: image3 },
   { title: 'Sakuras are beautiful!', image: image4 },
 ];
 
-export default class App extends Component {
-  state = {
-    selected: null,
-    position: null,
+export default function App() {
+  const [selected, setSelected] = useState(null);
+  const [position, setPosition] = useState(null);
+
+  const showImage = (post, pos) => {
+    setSelected(post);
+    setPosition(pos);
   };
 
-  showImage = (selected, position) => {
-    this.setState({
-      selected,
-      position,
-    });
-  }
+  const closeViewer = () => {
+    setSelected(null);
+    setPosition(null);
+  };
 
-  closeViewer = () => {
-    this.setState({
-      selected: null,
-      position: null,
-    });
-  }
-
-  renderViewer() {
-    const { selected, position } = this.state;
-
-    if (selected) {
-      return (
-        <PhotoViewer
-          post={selected}
-          position={position}
-          onClose={this.closeViewer}
-        />
-      );
-    }
-  }
-
-  render() {
-    return (
-      <SafeAreaView style={styles.main}>
-        <Text style={styles.toolbar}>Timeline</Text>
-        <ScrollView style={styles.content}>
-        {
-          timeline.map((post, index) =>
-            <PostContainer key={index} post={post}
-            onPress={this.showImage} />
-          )
-        }
-        </ScrollView>
-        {this.renderViewer()}
-      </SafeAreaView>
-    );
-  }
-
+  return (
+    <SafeAreaView style={styles.main}>
+      <Text style={styles.toolbar}>Timeline</Text>
+      <ScrollView style={styles.content}>
+        {timeline.map((post, index) => (
+          <PostContainer key={index} post={post} onPress={showImage} />
+        ))}
+      </ScrollView>
+      {selected ? (
+        <PhotoViewer post={selected} position={position} onClose={closeViewer} />
+      ) : null}
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({

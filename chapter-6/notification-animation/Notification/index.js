@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Easing,
@@ -6,89 +6,65 @@ import {
   Text,
 } from 'react-native';
 
-export default class Notification extends Component {
-  static defaultProps = {
-    delay: 5000,
-    onClose: () => {},
-    onOpen: () => {},
+export default function Notification({
+  delay = 5000,
+  onClose = () => {},
+  onOpen = () => {},
+  message,
+  autoHide,
+}) {
+  const [height, setHeight] = useState(-1000);
+  const animatedValue = useRef(new Animated.Value(0)).current;
+
+  const getAnimation = (value, withDelay) =>
+    Animated.timing(animatedValue, {
+      toValue: value,
+      duration: 500,
+      easing: Easing.cubic,
+      delay: withDelay ? delay : 0,
+      useNativeDriver: false,
+    });
+
+  const startSlideOut = () => {
+    animatedValue.setValue(1);
+    getAnimation(0, autoHide).start(() => onClose());
   };
 
-  state = {
-    height: -1000,
-  };
-
-  componentWillMount() {
-    this.animatedValue = new Animated.Value();
-  }
-
-  componentDidMount() {
-    this.startSlideIn();
-  }
-
-  getAnimation(value, autoHide) {
-    const { delay } = this.props;
-    return Animated.timing(
-      this.animatedValue,
-      {
-        toValue: value,
-        duration: 500,
-        easing: Easing.cubic,
-        delay: autoHide ? delay : 0,
+  const startSlideIn = () => {
+    animatedValue.setValue(0);
+    getAnimation(1).start(() => {
+      onOpen();
+      if (autoHide) {
+        startSlideOut();
       }
-    );
-  }
+    });
+  };
 
-  startSlideIn () {
-    const { onOpen, autoHide } = this.props;
+  useEffect(() => {
+    startSlideIn();
+  }, []);
 
-    this.animatedValue.setValue(0);
-    this.getAnimation(1)
-      .start(() => {
-        onOpen();
-        if (autoHide){
-          this.startSlideOut();
-        }
-      });
-  }
-
-  startSlideOut() {
-    const { autoHide, onClose } = this.props;
-
-    this.animatedValue.setValue(1);
-    this.getAnimation(0, autoHide)
-      .start(() => onClose());
-  }
-
-  onLayoutChange = (event) => {
-    const {layout: { height } } = event.nativeEvent;
-    if (this.state.height === -1000) {
-      this.setState({ height });
+  const onLayoutChange = (event) => {
+    const { layout: { height: h } } = event.nativeEvent;
+    if (height === -1000) {
+      setHeight(h);
     }
-   }
+  };
 
-  render() {
-    const { message } = this.props;
-    const { height } = this.state;
-    const top = this.animatedValue.interpolate({
-       inputRange: [0, 1],
-       outputRange: [-height, 0],
-     });
+  const top = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-height, 0],
+  });
 
-     return (
-      <Animated.View
-        onLayout={this.onLayoutChange}
-        style={[
-          styles.main,
-          { top }
-        ]}
-      >
-        <Text style={styles.text}>{message}</Text>
-      </Animated.View>
-    );
-   }
+  return (
+    <Animated.View
+      onLayout={onLayoutChange}
+      style={[styles.main, { top }]}
+    >
+      <Text style={styles.text}>{message}</Text>
+    </Animated.View>
+  );
 }
-
-function emptyFn() {}
 
 const styles = StyleSheet.create({
   main: {

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import {
   Alert,
@@ -12,77 +12,60 @@ import {
 
 const endpoint = 'http://jsonplaceholder.typicode.com/posts';
 
-export default class App extends Component {
-  state = {
-    results: '',
-    title: '',
-    body: '',
+export default function App() {
+  const [results, setResults] = useState('');
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+
+  const onLoad = async () => {
+    setResults('Loading, please wait...');
+    const response = await axios.get(endpoint);
+    setResults(JSON.stringify(response.data));
   };
 
-  onTitleChange = (title) => this.setState({ title });
-  onPostChange = (body) => this.setState({ body });
-
-  onLoad = async () => {
-    this.setState({ results: 'Loading, please wait...' });
-    const response = await axios.get(endpoint);
-    const results = JSON.stringify(response);
-    this.setState({ results });
-  }
-
-  onSave = async () => {
-    const { title, body } = this.state;
+  const onSave = async () => {
     try {
-      const response = await axios.post(endpoint, {
-        headers: {
-          'Content-Type': 'application/json;charset=UTF-8',
-        },
-        params: {
-          userId: 1,
-          title,
-          body
-        }
+      await axios.post(endpoint, {
+        userId: 1,
+        title,
+        body,
       });
-      const results = JSON.stringify(response);
       Alert.alert('Success', 'Post successfully saved');
-      this.onLoad();
+      onLoad();
     } catch (error) {
       Alert.alert('Error', `There was an error while saving the post: ${error}`);
     }
-  }
+  };
 
-  render() {
-    const { results, title, body } = this.state;
-
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.toolbar}>Add a new post</Text>
-        <ScrollView style={styles.content}>
-          <TextInput
-            style={styles.input}
-            onChangeText={this.onTitleChange}
-            value={title}
-            placeholder="Title"
-          />
-          <TextInput
-            style={styles.input}
-            onChangeText={this.onPostChange}
-            value={body}
-            placeholder="Post body..."
-          />
-          <TouchableOpacity onPress={this.onSave} style={styles.button}>
-            <Text>Save</Text>
-          </TouchableOpacity>
-          <TextInput
-            style={styles.preview}
-            value={results}
-            placeholder="Results..."
-            editable={false}
-            multiline
-          />
-        </ScrollView>
-      </SafeAreaView>
-    );
-  }
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.toolbar}>Add a new post</Text>
+      <ScrollView style={styles.content}>
+        <TextInput
+          style={styles.input}
+          onChangeText={setTitle}
+          value={title}
+          placeholder="Title"
+        />
+        <TextInput
+          style={styles.input}
+          onChangeText={setBody}
+          value={body}
+          placeholder="Post body..."
+        />
+        <TouchableOpacity onPress={onSave} style={styles.button}>
+          <Text>Save</Text>
+        </TouchableOpacity>
+        <TextInput
+          style={styles.preview}
+          value={results}
+          placeholder="Results..."
+          editable={false}
+          multiline
+        />
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({

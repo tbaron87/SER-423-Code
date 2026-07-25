@@ -1,17 +1,14 @@
-import React from 'react';
-import {
-  Text,
-  StyleSheet,
-  SafeAreaView,
-} from 'react-native';
+import { Text, StyleSheet, SafeAreaView } from 'react-native';
 import ContactList from './ContactList';
 
-const App = () => (
-  <SafeAreaView style={styles.main}>
-    <Text style={styles.toolbar}>Contacts</Text>
-    <ContactList style={styles.content} />
-  </SafeAreaView>
-);
+export default function App() {
+  return (
+    <SafeAreaView style={styles.main}>
+      <Text style={styles.toolbar}>Contacts</Text>
+      <ContactList style={styles.content} />
+    </SafeAreaView>
+  );
+}
 
 const styles = StyleSheet.create({
   main: {
@@ -29,5 +26,3 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-
-export default App;

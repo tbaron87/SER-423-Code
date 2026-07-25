@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useRef } from 'react';
 import {
   Dimensions,
   Image,
@@ -10,42 +10,25 @@ import {
 
 const { width } = Dimensions.get('window');
 
-export default class PostContainer extends Component {
-  static defaultProps = {
-    onPress: () => {},
+export default function PostContainer({ post, onPress = () => {} }) {
+  const mainRef = useRef(null);
+
+  const onPressImage = () => {
+    mainRef.current.measure((fx, fy, w, h, pageX, pageY) => {
+      onPress(post, { width: w, height: h, pageX, pageY });
+    });
   };
 
-  onPressImage = (event) => {
-    const { onPress, post } = this.props;
-    this.refs.main.measure((fx, fy, width, height, pageX, pageY) => {
-      onPress(post, {
-        width,
-        height,
-        pageX,
-        pageY,
-      });
-    });
-  }
+  const { image, title } = post;
 
-  render() {
-    const { post: { image, title } } = this.props;
-
-    return (
-      <View style={styles.main} ref="main">
-        <TouchableOpacity
-           onPress={this.onPressImage}
-           activeOpacity={0.9}
-            >
-          <Image
-            source={image}
-            style={styles.image}
-            resizeMode="cover"
-          />
-        </TouchableOpacity>
-        <Text style={styles.title}>{title}</Text>
-      </View>
-    );
-  }
+  return (
+    <View style={styles.main} ref={mainRef}>
+      <TouchableOpacity onPress={onPressImage} activeOpacity={0.9}>
+        <Image source={image} style={styles.image} resizeMode="cover" />
+      </TouchableOpacity>
+      <Text style={styles.title}>{title}</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -54,9 +37,6 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     paddingBottom: 10,
   },
-  content: {
-    flex: 1,
-  },
   image: {
     width,
     height: 300,
@@ -64,5 +44,5 @@ const styles = StyleSheet.create({
   title: {
     margin: 10,
     color: '#ccc',
-  }
+  },
 });

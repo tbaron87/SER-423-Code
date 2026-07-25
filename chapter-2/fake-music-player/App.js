@@ -1,19 +1,16 @@
-import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-export default class App extends React.Component {
-  render() {
-    const name = '01 - Blue Behind Green Bloches';
+export default function App() {
+  const name = '01 - Blue Behind Green Bloches';
 
-    return (
-      <View style={styles.container}>
-        <View style={styles.innerContainer} />
-        <Text style={styles.title}>
-          <Text style={styles.subtitle}>Playing:</Text> {name}
-        </Text>
-      </View>
-    );
-  }
+  return (
+    <View style={styles.container}>
+      <View style={styles.innerContainer} />
+      <Text style={styles.title}>
+        <Text style={styles.subtitle}>Playing:</Text> {name}
+      </Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

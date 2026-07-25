@@ -1,11 +1,8 @@
-import React, { Component } from 'react';
-import {
-  ListView,
-  ScrollView,
-} from 'react-native';
+import { useState } from 'react';
+import { FlatList } from 'react-native';
 import ContactItem from './ContactItem';
 
-const data = [
+const initialData = [
   { id: 1, name: 'Jon Snow' },
   { id: 2, name: 'Luke Skywalker' },
   { id: 3, name: 'Bilbo Baggins' },
@@ -13,53 +10,31 @@ const data = [
   { id: 5, name: 'Mr. Magoo' },
 ];
 
-export default class ContactList extends Component {
-  ds = new ListView.DataSource({
-    rowHasChanged: (r1, r2) => r1 !== r2
-  });
+export default function ContactList() {
+  const [contacts, setContacts] = useState(initialData);
+  const [swiping, setSwiping] = useState(false);
 
-  state = {
-    dataSource: this.ds.cloneWithRows(data),
-    swiping: false,
+  const handleRemoveContact = (contact) => {
+    setContacts((prev) => prev.filter((item) => item.id !== contact.id));
   };
 
-  handleRemoveContact = (contact) => {
-    const index = data.findIndex(
-      (item) => item.id === contact.id
-    );
-    data.splice(index, 1);
+  const handleToggleSwipe = () => {
+    setSwiping((prev) => !prev);
+  };
 
-    this.setState({
-        dataSource: this.ds.cloneWithRows(data),
-    });
-  }
-
-  handleToggleSwipe = () => {
-    this.setState({ swiping: !this.state.swiping });
-  }
-
-  renderItem = (contact) => (
-    <ContactItem
-      contact={contact}
-      onRemove={this.handleRemoveContact}
-      onDragEnd={this.handleToggleSwipe}
-      onDragStart={this.handleToggleSwipe}
+  return (
+    <FlatList
+      data={contacts}
+      keyExtractor={(item) => String(item.id)}
+      scrollEnabled={!swiping}
+      renderItem={({ item }) => (
+        <ContactItem
+          contact={item}
+          onRemove={handleRemoveContact}
+          onDragEnd={handleToggleSwipe}
+          onDragStart={handleToggleSwipe}
+        />
+      )}
     />
   );
-
-  render() {
-    const { dataSource, swiping } = this.state;
-
-    return (
-    <ListView
-        key={data}
-        enableEmptySections
-        dataSource={dataSource}
-        renderScrollComponent={
-        (props) => <ScrollView {...props} scrollEnabled={!swiping}/>
-        }
-        renderRow={this.renderItem}
-      />
-    );
-  }
 }

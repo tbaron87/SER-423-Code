@@ -1,14 +1,12 @@
 {
   "expo": {
     "name": "flexbox-layout",
-    "description": "This project is really great.",
     "slug": "flexbox-layout",
-    "privacy": "public",
-    "sdkVersion": "32.0.0",
-    "platforms": ["ios", "android"],
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -16,6 +14,15 @@
     },
     "ios": {
       "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
     }
   }
 }

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import {
   Text,
   TouchableOpacity,
@@ -8,50 +8,42 @@ import {
 } from 'react-native';
 import Notification from './Notification';
 
-export default class App extends Component {
+export default function App() {
+  const [notify, setNotify] = useState(false);
+  const message = 'This is a notification!';
 
-  state = {
-    notify: false,
-    message: 'This is a notification!',
+  const toggleNotification = () => {
+    setNotify(!notify);
   };
 
-  toggleNotification = () => {
-    this.setState({
-      notify: !this.state.notify,
-    });
-  }
-
-  render() {
-    const notify = this.state.notify
-      ? <Notification
-          autoHide
-          message={this.state.message}
-          onClose={this.toggleNotification}
-        />
-    : null;
-    return (
-      <SafeAreaView>
-        <Text style={styles.toolbar}>Main toolbar</Text>
-        <View style={styles.content}>
-          <Text>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-            sed do eiusmod tempor incididunt ut labore et dolore magna.
-          </Text>
-          <TouchableOpacity
-            onPress={this.toggleNotification}
-            style={styles.btn}
-          >
-            <Text style={styles.text}>Show notification</Text>
-          </TouchableOpacity>
-          <Text>
-            Sed ut perspiciatis unde omnis iste natus error sit
-            accusantium doloremque laudantium.
-          </Text>
-          {notify}
-        </View>
-      </SafeAreaView>
-    );
-  }
+  return (
+    <SafeAreaView>
+      <Text style={styles.toolbar}>Main toolbar</Text>
+      <View style={styles.content}>
+        <Text>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+          sed do eiusmod tempor incididunt ut labore et dolore magna.
+        </Text>
+        <TouchableOpacity
+          onPress={toggleNotification}
+          style={styles.btn}
+        >
+          <Text style={styles.text}>Show notification</Text>
+        </TouchableOpacity>
+        <Text>
+          Sed ut perspiciatis unde omnis iste natus error sit
+          accusantium doloremque laudantium.
+        </Text>
+        {notify ? (
+          <Notification
+            autoHide
+            message={message}
+            onClose={toggleNotification}
+          />
+        ) : null}
+      </View>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({

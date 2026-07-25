@@ -1,12 +1,10 @@
-import React, { Component } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   Animated,
-  Dimensions,
   Easing,
   Image,
   StyleSheet,
   TouchableOpacity,
-  View,
 } from 'react-native';
 
 const icons = {
@@ -17,57 +15,33 @@ const icons = {
   surprised: require('./images/surprised.png'),
 };
 
-export default class Icon extends Component {
-  static defaultProps = {
-    delay: 0,
-    onPress: () => {},
-  };
+export default function Icon({ name, index, delay = 0, onPress = () => {} }) {
+  const animatedValue = useRef(new Animated.Value(0)).current;
 
-  componentWillMount() {
-    this.animatedValue = new Animated.Value(0);
-  }
+  useEffect(() => {
+    Animated.timing(animatedValue, {
+      toValue: 1,
+      duration: 200,
+      easing: Easing.elastic(1),
+      delay,
+      useNativeDriver: false,
+    }).start();
+  }, []);
 
-  componentDidMount() {
-    const { delay } = this.props;
+  const left = index * 50;
+  const top = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [10, -95],
+  });
+  const opacity = animatedValue;
 
-    Animated.timing(
-      this.animatedValue,
-      {
-        toValue: 1,
-        duration: 200,
-        easing: Easing.elastic(1),
-        delay,
-      }
-    ).start();
-  }
-
-  onPressIcon = () => {
-    const { onPress, name } = this.props;
-    onPress(name);
-  }
-
-  render() {
-    const { name, index, onPress } = this.props;
-    const left = index * 50;
-    const top = this.animatedValue.interpolate({
-      inputRange: [0, 1],
-      outputRange: [10, -95],
-    });
-    const opacity = this.animatedValue;
-
-    return (
-      <Animated.View
-        style={[
-          styles.icon,
-          { top, left, opacity },
-        ]}
-      >
-        <TouchableOpacity onPress={this.onPressIcon}>
-          <Image source={icons[name]} style={styles.image} />
-        </TouchableOpacity>
-      </Animated.View>
-    );
-  }
+  return (
+    <Animated.View style={[styles.icon, { top, left, opacity }]}>
+      <TouchableOpacity onPress={() => onPress(name)}>
+        <Image source={icons[name]} style={styles.image} />
+      </TouchableOpacity>
+    </Animated.View>
+  );
 }
 
 const styles = StyleSheet.create({

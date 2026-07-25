@@ -1,46 +1,40 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import {
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
 
-export default class App extends Component {
-  state = {
-    results: '',
-  };
+export default function App() {
+  const [results, setResults] = useState('');
 
-  onLoad = async () => {
-    this.setState({ results: 'Loading, please wait...' });
+  const onLoad = async () => {
+    setResults('Loading, please wait...');
     const response = await fetch('http://jsonplaceholder.typicode.com/users', {
       method: 'GET',
     });
-    const results = await response.text();
-    this.setState({ results });
-  }
+    const text = await response.text();
+    setResults(text);
+  };
 
-  render() {
-    const { results } = this.state;
-
-    return (
-      <View style={styles.container}>
-        <View>
-          <TextInput
-            style={styles.preview}
-            value={results}
-            placeholder="Results..."
-            editable={false}
-            multiline
-          />
-          <TouchableOpacity onPress={this.onLoad} style={styles.button}>
-            <Text>Load data</Text>
-          </TouchableOpacity>
-        </View>
+  return (
+    <View style={styles.container}>
+      <View>
+        <TextInput
+          style={styles.preview}
+          value={results}
+          placeholder="Results..."
+          editable={false}
+          multiline
+        />
+        <TouchableOpacity onPress={onLoad} style={styles.button}>
+          <Text>Load data</Text>
+        </TouchableOpacity>
       </View>
-    );
-  }
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

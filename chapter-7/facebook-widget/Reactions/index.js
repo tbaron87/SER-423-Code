@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import {
   Image,
   Text,
@@ -10,65 +10,40 @@ import Icon from './Icon';
 
 const image = require('./images/like.png');
 
-export default class Reactions extends Component {
-  static defaultProps = {
-    icons: [
-      'like', 'heart', 'angry', 'laughing', 'surprised',
-    ],
+export default function Reactions({ icons = ['like', 'heart', 'angry', 'laughing', 'surprised'], style }) {
+  const [show, setShow] = useState(false);
+  const [selected, setSelected] = useState('');
+
+  const onSelectReaction = (reaction) => {
+    setSelected(reaction);
+    setShow(false);
   };
 
-  state = {
-    show: false,
-    selected: '',
+  const toggleReactions = () => {
+    setShow(!show);
   };
 
-  onSelectReaction = (reaction) => {
-    this.setState({
-      selected: reaction,
-    });
-    this.toggleReactions();
-  }
-
-  toggleReactions = () => {
-    this.setState({
-      show: !this.state.show,
-    });
-  };
-
-  renderReactions() {
-    const { icons } = this.props;
-    if (this.state.show) {
-      return (
+  return (
+    <View style={[style, styles.container]}>
+      <TouchableOpacity onPress={toggleReactions}>
+        <Image source={image} style={styles.icon} />
+      </TouchableOpacity>
+      <Text>{selected}</Text>
+      {show ? (
         <View style={styles.reactions}>
-        { icons.map((name, index) => (
+          {icons.map((name, index) => (
             <Icon
               key={index}
               name={name}
               delay={index * 100}
               index={index}
-              onPress={this.onSelectReaction}
+              onPress={onSelectReaction}
             />
-          ))
-        }
+          ))}
         </View>
-      );
-    }
-  }
-
-  render() {
-    const { style } = this.props;
-    const { selected } = this.state;
-
-    return (
-      <View style={[style, styles.container]}>
-        <TouchableOpacity onPress={this.toggleReactions}>
-          <Image source={image} style={styles.icon} />
-        </TouchableOpacity>
-        <Text>{selected}</Text>
-        {this.renderReactions()}
-      </View>
-    );
-  }
+      ) : null}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
