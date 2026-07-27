@@ -1,51 +1,38 @@
-import React from 'react';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { TabNavigator, TabBarBottom } from 'react-navigation';
 import HomeScreen from '../screens/HomeScreen';
 import LinksScreen from '../screens/LinksScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 
-export default TabNavigator({
-  Home: {
-    screen: HomeScreen,
-  },
-  Links: {
-    screen: LinksScreen,
-  },
-  Settings: {
-    screen: SettingsScreen,
-  },
-}, {
-  navigationOptions: ({ navigation }) => ({
-    tabBarIcon: ({ focused }) => {
-      const { routeName } = navigation.state;
-      let iconName;
-      switch (routeName) {
-        case 'Home':
-          iconName = `ios-information-circle`;
-          break;
-        case 'Links':
-          iconName = `ios-link`;
-          break;
-        case 'Settings':
-          iconName = `ios-options`;
-      }
-      return (
-        <Ionicons name={iconName}
-          size={28} style={{ marginBottom: -3 }}
-          color={focused ? Colors.tabIconSelected :
-            Colors.tabIconDefault}
-        />
-      );
-    },
-  }),
-  tabBarComponent: TabBarBottom,
-  tabBarPosition: 'bottom',
-  animationEnabled: false,
-  swipeEnabled: false,
-});
+const Tab = createBottomTabNavigator();
 
-const Colors = {
-  tabIconDefault: '#ccc',
-  tabIconSelected: '#2f95dc',
+export default function MainTabNavigator() {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+          switch (route.name) {
+            case 'Home':
+              iconName = 'information-circle';
+              break;
+            case 'Links':
+              iconName = 'link';
+              break;
+            case 'Settings':
+              iconName = 'options';
+              break;
+          }
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: '#2f95dc',
+        tabBarInactiveTintColor: '#ccc',
+        headerShown: false,
+      })}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Links" component={LinksScreen} />
+      <Tab.Screen name="Settings" component={SettingsScreen} />
+    </Tab.Navigator>
+  );
 }

@@ -1,20 +1,11 @@
-import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-export default class LinksScreen extends React.Component {
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.headline}>
-          Links
-        </Text>
-      </View>
-    );
-  }
+export default function LinksScreen() {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.headline}>Links</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -28,5 +19,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 30,
     color: 'white',
-  }
+  },
 });

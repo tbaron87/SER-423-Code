@@ -1,45 +1,42 @@
-import React, { Component } from 'react';
-import {
-  StyleSheet,
-  View,
-} from 'react-native';
-import { TabViewAnimated, TabBar, SceneMap } from 'react-native-tab-view';
+import { useState } from 'react';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { TabView, TabBar, SceneMap } from 'react-native-tab-view';
 
-const FirstRoute = () => <View style={[ styles.container, { backgroundColor: '#C586BD' } ]} />;
-const SecondRoute = () => <View style={[ styles.container, { backgroundColor: '#4AC9B0' } ]} />;
-const ThirdRoute = () => <View style={[ styles.container, { backgroundColor: '#1CB5AD' } ]} />;
+const FirstRoute = () => <View style={[styles.container, { backgroundColor: '#C586BD' }]} />;
+const SecondRoute = () => <View style={[styles.container, { backgroundColor: '#4AC9B0' }]} />;
+const ThirdRoute = () => <View style={[styles.container, { backgroundColor: '#1CB5AD' }]} />;
 
-export default class App extends React.Component {
-  state = {
-    index: 0,
-    routes: [
-      { key: 'first', title: 'First' },
-      { key: 'second', title: 'Second' },
-      { key: 'third', title: 'Third' },
-    ],
-  };
+const renderScene = SceneMap({
+  first: FirstRoute,
+  second: SecondRoute,
+  third: ThirdRoute,
+});
 
-  renderScene = SceneMap({
-    first: FirstRoute,
-    second: SecondRoute,
-    third: ThirdRoute,
-  });
+export default function App() {
+  const layout = useWindowDimensions();
+  const [index, setIndex] = useState(0);
+  const [routes] = useState([
+    { key: 'first', title: 'First' },
+    { key: 'second', title: 'Second' },
+    { key: 'third', title: 'Third' },
+  ]);
 
-  render() {
-    return (
-      <TabViewAnimated
-        style={styles.container}
-        navigationState={this.state}
-        renderScene={this.renderScene}
-        renderFooter={props => <TabBar {...props} />}
-        onIndexChange={index => this.setState({ index })}
-      />
-    );
-  }
+  return (
+    <TabView
+      navigationState={{ index, routes }}
+      renderScene={renderScene}
+      onIndexChange={setIndex}
+      initialLayout={{ width: layout.width }}
+      renderTabBar={(props) => <TabBar {...props} style={styles.tabBar} />}
+    />
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  tabBar: {
+    backgroundColor: '#333',
   },
 });
