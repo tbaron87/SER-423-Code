@@ -1,22 +1,25 @@
-import React, { Component } from 'react';
-import { StackNavigator } from 'react-navigation';
-
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './HomeScreen';
 import BrowserScreen from './BrowserScreen';
 
-const App = StackNavigator({
-  Home: {
-    screen: HomeScreen,
-    navigationOptions: ({ navigation }) => ({
-      title: 'Home'
-    }),
-  },
-  Browser: {
-    screen: BrowserScreen,
-    navigationOptions: ({ navigation }) => ({
-      title: navigation.state.params.title
-    }),
-  },
-});
+const Stack = createNativeStackNavigator();
 
-export default App;
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ title: 'Home' }}
+        />
+        <Stack.Screen
+          name="Browser"
+          component={BrowserScreen}
+          options={({ route }) => ({ title: route.params.title })}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}

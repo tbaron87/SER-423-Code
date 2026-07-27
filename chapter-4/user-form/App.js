@@ -1,23 +1,16 @@
-import React from 'react';
-import {
-  Alert,
-  StyleSheet,
-  ScrollView,
-  SafeAreaView,
-  Text,
-  TextInput,
-} from 'react-native';
-
+import { StyleSheet, ScrollView, SafeAreaView, Text } from 'react-native';
 import UserForm from './UserForm';
 
-const App = () => (
-  <SafeAreaView style={styles.main}>
-    <Text style={styles.toolbar}>Fitness App</Text>
-    <ScrollView style={styles.content}>
-      <UserForm />
-    </ScrollView>
-  </SafeAreaView>
-);
+export default function App() {
+  return (
+    <SafeAreaView style={styles.main}>
+      <Text style={styles.toolbar}>Fitness App</Text>
+      <ScrollView style={styles.content}>
+        <UserForm />
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
 
 const styles = StyleSheet.create({
   main: {
@@ -34,5 +27,3 @@ const styles = StyleSheet.create({
     padding: 10,
   },
 });
-
-export default App;

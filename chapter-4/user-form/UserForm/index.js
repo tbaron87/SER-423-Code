@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import {
   Alert,
   StyleSheet,
@@ -8,51 +8,79 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-export default class UserForm extends Component {
-  state = {};
+export default function UserForm() {
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [errors, setErrors] = useState({});
 
-  handleButtonPress = () => {
-    const { name, phone, email } = this.state;
+  const validate = () => {
+    const newErrors = {};
 
-    Alert.alert(`User's data`,`Name: ${name}, Phone: ${phone}, Email: ${email}`);
-  }
+    if (!name.trim()) {
+      newErrors.name = 'Name is required';
+    }
 
-  renderTextfield(options) {
-    return (
+    if (!phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!/^\d{7,15}$/.test(phone.replace(/\D/g, ''))) {
+      newErrors.phone = 'Please enter a valid phone number';
+    }
+
+    if (!email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (validate()) {
+      Alert.alert("User's data", `Name: ${name}, Phone: ${phone}, Email: ${email}`);
+    }
+  };
+
+  return (
+    <View style={styles.panel}>
+      <Text style={styles.instructions}>
+        Please enter your contact information
+      </Text>
+
       <TextInput
-        style={styles.textfield}
-        onChangeText={(value) => this.setState({ [options.name]: value })}
-        placeholder={options.placeholder}
-        value={this.state[options.name]}
-        keyboardType={options.keyboard || 'default'}
+        style={[styles.textfield, errors.name && styles.textfieldError]}
+        onChangeText={setName}
+        value={name}
+        placeholder="Your name"
       />
-    );
-  }
+      {errors.name ? <Text style={styles.errorText}>{errors.name}</Text> : null}
 
-  renderButton() {
-    return (
-      <TouchableOpacity
-        onPress={this.handleButtonPress}
-        style={styles.button}
-      >
+      <TextInput
+        style={[styles.textfield, errors.phone && styles.textfieldError]}
+        onChangeText={setPhone}
+        value={phone}
+        placeholder="Your phone number"
+        keyboardType="phone-pad"
+      />
+      {errors.phone ? <Text style={styles.errorText}>{errors.phone}</Text> : null}
+
+      <TextInput
+        style={[styles.textfield, errors.email && styles.textfieldError]}
+        onChangeText={setEmail}
+        value={email}
+        placeholder="Your email address"
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
+
+      <TouchableOpacity onPress={handleSubmit} style={styles.button}>
         <Text style={styles.buttonText}>Save</Text>
       </TouchableOpacity>
-    );
-  }
-
-  render() {
-    return (
-      <View style={styles.panel}>
-        <Text style={styles.instructions}>
-          Please enter your contact information
-        </Text>
-        {this.renderTextfield({ name: 'name', placeholder: 'Your name' })}
-        {this.renderTextfield({ name: 'phone', placeholder: 'Your phone number', keyboard: 'phone-pad' })}
-        {this.renderTextfield({ name: 'email', placeholder: 'Your email address', keyboard: 'email-address'})}
-        {this.renderButton()}
-      </View>
-    );
-  }
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -71,12 +99,24 @@ const styles = StyleSheet.create({
   textfield: {
     height: 40,
     marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    paddingHorizontal: 5,
+  },
+  textfieldError: {
+    borderBottomColor: '#e74c3c',
+  },
+  errorText: {
+    color: '#e74c3c',
+    fontSize: 12,
+    marginBottom: 10,
+    marginTop: -5,
   },
   button: {
     backgroundColor: '#34495e',
     borderRadius: 3,
     padding: 12,
-    flex: 1,
+    marginTop: 10,
   },
   buttonText: {
     textAlign: 'center',

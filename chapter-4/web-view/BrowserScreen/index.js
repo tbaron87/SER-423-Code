@@ -1,14 +1,7 @@
-import React, { Component } from 'react';
-import { WebView } from 'react-native';
+import { WebView } from 'react-native-webview';
 
-export default class BrowserScreen extends Component {
-  render() {
-    const { params } = this.props.navigation.state;
+export default function BrowserScreen({ route }) {
+  const { url } = route.params;
 
-    return(
-      <WebView
-        source={{uri: params.url}}
-      />
-    );
-  }
+  return <WebView source={{ uri: url }} />;
 }
