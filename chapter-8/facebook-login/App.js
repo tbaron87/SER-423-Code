@@ -1,61 +1,79 @@
-import React from 'react';
+import { useState } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
-  Alert
 } from 'react-native';
-import { Facebook } from 'expo';
-import APP_ID from './APP_ID';
+import * as AuthSession from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser';
 
-export default class App extends React.Component {
-  state = {
-    loggedIn: false,
-    facebookUserInfo: {}
-  }
+// Ensure the auth session completes properly on web
+WebBrowser.maybeCompleteAuthSession();
 
-  logIn = async () => {
-    const { type, token } = await Facebook.logInWithReadPermissionsAsync(APP_ID, {
-      permissions: ['public_profile'],
+// NOTE: Replace this with your own Facebook App ID from https://developers.facebook.com
+// You must configure a valid OAuth redirect URI in your Facebook app settings.
+const FACEBOOK_APP_ID = 'YOUR_FACEBOOK_APP_ID';
+
+// Facebook OAuth discovery document
+const discovery = {
+  authorizationEndpoint: 'https://www.facebook.com/v18.0/dialog/oauth',
+  tokenEndpoint: 'https://graph.facebook.com/v18.0/oauth/access_token',
+};
+
+export default function App() {
+  const [userInfo, setUserInfo] = useState(null);
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  const redirectUri = AuthSession.makeRedirectUri();
+
+  const logIn = async () => {
+    const result = await AuthSession.startAsync({
+      authUrl:
+        `https://www.facebook.com/v18.0/dialog/oauth` +
+        `?client_id=${FACEBOOK_APP_ID}` +
+        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+        `&response_type=token` +
+        `&scope=public_profile`,
     });
 
-    if (type === 'success') {
-      const response = await fetch(`https://graph.facebook.com/me?access_token=${token}`);
-      const facebookUserInfo = await response.json();
-      this.setState({
-        facebookUserInfo,
-        loggedIn: true
-      });
+    if (result.type === 'success') {
+      // Use the access token to fetch user info from the Graph API
+      const response = await fetch(
+        `https://graph.facebook.com/me?access_token=${result.params.access_token}&fields=id,name`
+      );
+      const data = await response.json();
+      setUserInfo(data);
+      setLoggedIn(true);
     }
-  }
+  };
 
-  renderFacebookUserInfo = () => {
-    return this.state.loggedIn ? (
-      <View style={styles.facebookUserInfo}>
-        <Text style={styles.facebookUserInfoLabel}>Name:</Text>
-        <Text style={styles.facebookUserInfoText}>{this.state.facebookUserInfo.name}</Text>
-        <Text style={styles.facebookUserInfoLabel}>User ID:</Text>
-        <Text style={styles.facebookUserInfoText}>{this.state.facebookUserInfo.id}</Text>
-      </View>
-    ) : null;
-  }
+  const renderUserInfo = () => {
+    if (!loggedIn || !userInfo) return null;
 
-  render() {
     return (
-      <View style={styles.container}>
-        <Text style={styles.headerText}>Login via Facebook</Text>
-        <TouchableOpacity
-          onPress={this.logIn}
-          style={styles.button}
-        >
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-
-        {this.renderFacebookUserInfo()}
+      <View style={styles.userInfo}>
+        <Text style={styles.userInfoLabel}>Name:</Text>
+        <Text style={styles.userInfoText}>{userInfo.name}</Text>
+        <Text style={styles.userInfoLabel}>User ID:</Text>
+        <Text style={styles.userInfoText}>{userInfo.id}</Text>
       </View>
     );
-  }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.headerText}>Login via Facebook</Text>
+      <TouchableOpacity
+        onPress={logIn}
+        style={styles.button}
+        disabled={loggedIn}
+      >
+        <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+      {renderUserInfo()}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -68,24 +86,26 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 30,
     padding: 10,
-    backgroundColor: '#3B5998'
+    backgroundColor: '#1877F2',
+    borderRadius: 5,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 30
+    fontSize: 30,
   },
   headerText: {
-    fontSize: 30
+    fontSize: 30,
   },
-  facebookUserInfo: {
-    paddingTop: 30
+  userInfo: {
+    paddingTop: 30,
+    alignItems: 'center',
   },
-  facebookUserInfoText: {
-    fontSize: 24
+  userInfoText: {
+    fontSize: 24,
   },
-  facebookUserInfoLabel: {
+  userInfoLabel: {
     fontSize: 20,
     marginTop: 10,
-    color: '#474747'
-  }
+    color: '#474747',
+  },
 });
