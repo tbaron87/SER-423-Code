@@ -1,70 +1,72 @@
-import React, { Component } from 'react';
-import {
-  Location,
-  Permissions,
-  MapView,
-  Marker
-} from 'expo';
-import {
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { useState, useEffect } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import * as Location from 'expo-location';
+import MapView, { Marker } from 'react-native-maps';
 
-export default class App extends Component {
-  state = {
-    location: null
+export default function App() {
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        return;
+      }
+
+      const currentLocation = await Location.getCurrentPositionAsync({});
+      setLocation(currentLocation);
+    })();
+  }, []);
+
+  if (errorMsg) {
+    return (
+      <View style={styles.container}>
+        <Text>{errorMsg}</Text>
+      </View>
+    );
   }
 
-  async getLocation() {
-    let location = await Location.getCurrentPositionAsync();
-    this.setState({
-      location
-    });
+  if (!location) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading location...</Text>
+      </View>
+    );
   }
 
-  async componentDidMount() {
-    const permission = await Permissions.askAsync(Permissions.LOCATION);
-    if (permission.status === 'granted') {
-      this.getLocation();
-    }
-  }
-
-  renderMap() {
-    return this.state.location ?
+  return (
+    <View style={styles.container}>
       <MapView
         style={styles.map}
         initialRegion={{
-          latitude: this.state.location.coords.latitude,
-          longitude: this.state.location.coords.longitude,
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
           latitudeDelta: 0.09,
           longitudeDelta: 0.04,
         }}
       >
-        <MapView.Marker
-          coordinate={this.state.location.coords}
-          title={"User Location"}
-          description={"You are here!"}
+        <Marker
+          coordinate={location.coords}
+          title="User Location"
+          description="You are here!"
           image={require('./assets/you-are-here.png')}
         />
-      </MapView> : null
-  }
-
-  render() {
-    return (
-      <View style={styles.container}>
-        {this.renderMap()}
-      </View>
-    );
-  }
+      </MapView>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   map: {
-    flex: 1
-  }
+    flex: 1,
+    width: '100%',
+  },
 });

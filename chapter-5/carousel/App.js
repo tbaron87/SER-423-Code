@@ -1,158 +1,140 @@
-import React, { Component } from 'react';
+import { useState, useRef } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
   Text,
   View,
   Image,
+  FlatList,
   TouchableOpacity,
-  Picker,
   Dimensions,
 } from 'react-native';
-import Carousel from 'react-native-snap-carousel';
 
-export default class App extends Component {
-  state = {
-    showCarousel: false,
-    layoutType: 'default',
-    imageSearchTerms: [
-      'Books',
-      'Code',
-      'Nature',
-      'Cats',
-    ]
-  }
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-  updateLayoutType = (layoutType) => {
-    this.setState({
-      layoutType
-    });
-  }
+const imageSearchTerms = ['Books', 'Code', 'Nature', 'Cats'];
 
-  toggleCarousel = () => {
-    this.setState({
-      showCarousel: !this.state.showCarousel
-    });
-  }
+export default function App() {
+  const [showCarousel, setShowCarousel] = useState(false);
+  const flatListRef = useRef(null);
 
-  renderControls = () => {
-    return(
-      <View style={styles.container}>
-        <Picker
-          selectedValue={this.state.layoutType}
-          style={styles.picker}
-          onValueChange={this.updateLayoutType}
-        >
-          <Picker.Item label="Default" value="default" />
-          <Picker.Item label="Tinder" value="tinder" />
-          <Picker.Item label="Stack" value="stack" />
-        </Picker>
-        <TouchableOpacity
-          onPress={this.toggleCarousel}
-          style={styles.openButton}
-        >
-          <Text style={styles.openButtonText}>Open Carousel</Text>
+  const toggleCarousel = () => {
+    setShowCarousel(!showCarousel);
+  };
+
+  const renderItem = ({ item }) => (
+    <View style={styles.slide}>
+      <Image
+        style={styles.image}
+        source={{ uri: `https://source.unsplash.com/350x350/?${item}` }}
+      />
+      <Text style={styles.label}>{item}</Text>
+    </View>
+  );
+
+  const renderControls = () => (
+    <View style={styles.controlsContainer}>
+      <Text style={styles.heading}>Image Carousel</Text>
+      <Text style={styles.subtitle}>
+        Swipe through images loaded from Unsplash
+      </Text>
+      <TouchableOpacity onPress={toggleCarousel} style={styles.openButton}>
+        <Text style={styles.openButtonText}>Open Carousel</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderCarousel = () => (
+    <View style={styles.carouselContainer}>
+      <View style={styles.closeButtonContainer}>
+        <TouchableOpacity onPress={toggleCarousel} style={styles.closeButton}>
+          <Text style={styles.closeButtonText}>X</Text>
         </TouchableOpacity>
       </View>
-    )
-  }
+      <FlatList
+        ref={flatListRef}
+        data={imageSearchTerms}
+        renderItem={renderItem}
+        keyExtractor={(item) => item}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        snapToAlignment="center"
+        decelerationRate="fast"
+        getItemLayout={(data, index) => ({
+          length: SCREEN_WIDTH,
+          offset: SCREEN_WIDTH * index,
+          index,
+        })}
+      />
+    </View>
+  );
 
-  renderCarousel = () => {
-    return(
-      <View style={styles.carouselContainer}>
-        <View style={styles.closeButtonContainer}>
-          <TouchableOpacity
-            onPress={this.toggleCarousel}
-            style={styles.button}
-          >
-            <Text style={styles.label}>x</Text>
-          </TouchableOpacity>
-        </View>
-        <Carousel
-          layout={this.state.layoutType}
-          data={this.state.imageSearchTerms}
-          renderItem={this.renderItem}
-          sliderWidth={350}
-          itemWidth={350}
-        >
-        </Carousel>
-      </View>
-    );
-  }
-
-  renderItem = ({item}) => {
-    return (
-      <View style={styles.slide}>
-        <Image
-          style={styles.image}
-          source={{ uri: `https://source.unsplash.com/350x350/?${item}`}}
-        />
-        <Text style={styles.label}>{item}</Text>
-      </View>
-    );
-  }
-
-  render() {
-    return (
-      <SafeAreaView style={styles.container}>
-        {this.state.showCarousel ?
-          this.renderCarousel() :
-          this.renderControls()
-        }
-      </SafeAreaView>
-    );
-  }
+  return (
+    <SafeAreaView style={styles.container}>
+      {showCarousel ? renderCarousel() : renderControls()}
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'column',
     backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
   },
-  carouselContainer: {
+  controlsContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#474747'
+  },
+  heading: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 30,
+  },
+  carouselContainer: {
+    flex: 1,
+    backgroundColor: '#474747',
   },
   closeButtonContainer: {
-    width: 350,
     flexDirection: 'row',
-    justifyContent: 'flex-end'
+    justifyContent: 'flex-end',
+    padding: 15,
+  },
+  closeButton: {
+    padding: 10,
+  },
+  closeButtonText: {
+    fontSize: 24,
+    color: '#fff',
+    fontWeight: 'bold',
   },
   slide: {
-    flex: 1,
+    width: SCREEN_WIDTH,
     justifyContent: 'center',
     alignItems: 'center',
   },
   image: {
-    width:350,
+    width: 350,
     height: 350,
   },
   label: {
     fontSize: 30,
     padding: 40,
     color: '#fff',
-    backgroundColor: '#474747'
   },
   openButton: {
-    padding: 10,
-    backgroundColor: '#000'
+    padding: 15,
+    backgroundColor: '#000',
+    borderRadius: 5,
   },
   openButtonText: {
     fontSize: 20,
-    padding: 20,
     color: '#fff',
   },
-  closeButton: {
-    padding: 10
-  },
-  picker: {
-    height: 150,
-    width: 100,
-    backgroundColor: '#fff'
-  }
 });
