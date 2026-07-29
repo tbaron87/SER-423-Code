@@ -1,50 +1,44 @@
-import React, { Component } from 'react';
-import {
-  AppState,
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
+import { useState, useEffect, useRef } from 'react';
+import { AppState, StyleSheet, Text, View } from 'react-native';
 
-export default class App extends Component {
-  previousAppState = null;
-  currentAppState = 'active';
-  state = {
-    statusMessage: 'Welcome!'
-  }
+export default function App() {
+  const [statusMessage, setStatusMessage] = useState('Welcome!');
+  const appState = useRef(AppState.currentState);
 
-  componentWillMount() {
-    AppState.addEventListener('change', this.handleAppStateChange);
-  }
+  useEffect(() => {
+    // In modern RN, addEventListener returns a subscription object.
+    // Call subscription.remove() to clean up when the component unmounts.
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
 
-  handleAppStateChange = (appState) => {
-    let statusMessage;
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
-    this.previousAppState = this.currentAppState;
-    this.currentAppState = appState;
-    switch(appState) {
+  const handleAppStateChange = (nextAppState) => {
+    let message;
+
+    switch (nextAppState) {
       case 'inactive':
-        statusMessage = "Good Bye.";
+        message = 'Good Bye.';
         break;
       case 'background':
-        statusMessage = "App Is Hidden...";
+        message = 'App Is Hidden...';
         break;
       case 'active':
-        statusMessage = 'Welcome Back!'
+        message = appState.current !== 'active' ? 'Welcome Back!' : 'Welcome!';
         break;
     }
-    this.setState({ statusMessage });
-  }
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          {this.state.statusMessage}
-        </Text>
-      </View>
-    );
-  }
+    appState.current = nextAppState;
+    setStatusMessage(message);
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.welcome}>{statusMessage}</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -58,10 +52,5 @@ const styles = StyleSheet.create({
     fontSize: 40,
     textAlign: 'center',
     margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
   },
 });
