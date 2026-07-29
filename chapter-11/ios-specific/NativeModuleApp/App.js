@@ -1,77 +1,57 @@
-import React, { Component } from 'react';
+import { useState, useRef } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   NativeModules,
   TextInput,
-  Switch
+  Switch,
+  TouchableOpacity,
 } from 'react-native';
-import Button from 'react-native-button';
 
-const HelloManager = NativeModules.HelloManager;
+const { HelloManager } = NativeModules;
 
-export default class App extends Component {
-  state = {
-    greetingMessage: null,
-    userName: null,
-    isAdmin: false
-  }
+export default function App() {
+  const [userName, setUserName] = useState('');
+  const [greetingMessage, setGreetingMessage] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const inputRef = useRef(null);
 
-  greetUser = () => {
-    HelloManager.greetUser(
-      this.state.userName,
-      this.state.isAdmin,
-      this.displayResults
-    );
-  }
+  const greetUser = () => {
+    inputRef.current?.blur();
+    HelloManager.greetUser(userName, isAdmin, (result) => {
+      setGreetingMessage(result);
+    });
+  };
 
-  displayResults = (results) => {
-    this.refs.userName.blur();
-    this.setState({ greetingMessage: results });
-  }
-
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.label}>
-          Enter User Name
-        </Text>
-        <TextInput
-          ref="userName"
-          autoCorrect={false}
-          style={styles.inputField}
-          placeholder="User Name"
-          onChangeText={(text) => this.setState({ userName: text })}
-        />
-        <Text style={styles.label}>
-          Admin
-        </Text>
-        <Switch style={styles.radio}
-          value={this.state.isAdmin}
-          onValueChange={(value) =>
-            this.setState({ isAdmin: value })
-          }
-        />
-        <Button
-          disabled={!this.state.userName}
-          style={[
-            styles.buttonStyle,
-            !this.state.userName ? styles.disabled : null
-          ]}
-          onPress={this.greetUser}
-        >
-          Greet
-        </Button>
-        <Text style={styles.label}>
-          Response:
-        </Text>
-        <Text style={styles.message}>
-          {this.state.greetingMessage}
-        </Text>
-      </View>
-    );
-  }
+  return (
+    <View style={styles.container}>
+      <Text style={styles.label}>Enter User Name</Text>
+      <TextInput
+        ref={inputRef}
+        autoCorrect={false}
+        style={styles.inputField}
+        placeholder="User Name"
+        onChangeText={setUserName}
+        value={userName}
+      />
+      <Text style={styles.label}>Admin</Text>
+      <Switch
+        style={styles.radio}
+        onValueChange={setIsAdmin}
+        value={isAdmin}
+      />
+      <TouchableOpacity
+        disabled={!userName}
+        style={[styles.button, !userName ? styles.disabled : null]}
+        onPress={greetUser}
+      >
+        <Text style={styles.buttonText}>Greet</Text>
+      </TouchableOpacity>
+      <Text style={styles.label}>Response:</Text>
+      <Text style={styles.message}>{greetingMessage}</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -81,9 +61,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
   },
-  inputField:{
+  inputField: {
     padding: 20,
-    fontSize: 30
+    fontSize: 30,
+    width: 200,
   },
   label: {
     fontSize: 18,
@@ -91,20 +72,25 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   radio: {
-    marginBottom: 20
+    marginBottom: 20,
   },
-  buttonStyle: {
+  button: {
     padding: 20,
     backgroundColor: '#1DA1F2',
+    borderRadius: 5,
+  },
+  buttonText: {
     color: '#fff',
-    fontSize: 18
+    fontSize: 18,
   },
   message: {
     fontSize: 22,
     marginLeft: 50,
     marginRight: 50,
+    marginTop: 10,
+    textAlign: 'center',
   },
   disabled: {
-    backgroundColor: '#3C3C3C'
-  }
+    backgroundColor: '#3C3C3C',
+  },
 });

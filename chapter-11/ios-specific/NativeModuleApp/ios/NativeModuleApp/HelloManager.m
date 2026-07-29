@@ -2,23 +2,22 @@
 //  HelloManager.m
 //  NativeModuleApp
 //
-//  Created by Daniel Ward on 6/16/18.
-//  Copyright © 2018 Facebook. All rights reserved.
+//  This Objective-C file registers the Swift native module with React Native's bridge.
+//  Since React Native's module system is built in Obj-C, Swift modules need this
+//  companion file to declare their existence to the bridge.
+//
+//  RCT_EXTERN_MODULE declares the module name (must match @objc(HelloManager) in Swift)
+//  RCT_EXTERN_METHOD declares each method signature exposed to JavaScript
 //
 
-#import "HelloManager.h"
+#import <React/RCTBridgeModule.h>
 
-@implementation HelloManager
-RCT_EXPORT_MODULE();
+@interface RCT_EXTERN_MODULE(HelloManager, NSObject)
 
-RCT_EXPORT_METHOD(
-  greetUser: (NSString *)name isAdmin:(BOOL *)isAdmin callback: (RCTResponseSenderBlock) callback
-) {
-  NSString *greeting =
-    [NSString stringWithFormat:
-     @"Welcome %@, you %@ an administrator.", name, isAdmin ? @"are" : @"are not"];
-
-  callback(@[greeting]);
-}
+RCT_EXTERN_METHOD(
+  greetUser:(NSString *)name
+  isAdmin:(BOOL)isAdmin
+  callback:(RCTResponseSenderBlock)callback
+)
 
 @end
