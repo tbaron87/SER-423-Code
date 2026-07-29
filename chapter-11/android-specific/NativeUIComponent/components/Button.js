@@ -1,28 +1,25 @@
-import React, { Component } from 'react';
-import { requireNativeComponent, View } from 'react-native';
+import { requireNativeComponent } from 'react-native';
 
-export default class Button extends Component {
-  onChange = (event) => {
-    if (this.props.onTap) {
-      this.props.onTap(event.nativeEvent.message);
+/**
+ * Button is a JavaScript wrapper around the native Android ButtonView.
+ *
+ * requireNativeComponent bridges a native ViewManager (registered as 'ButtonView'
+ * in Kotlin) to a React component. Props passed here are forwarded to the native
+ * view via @ReactProp annotations on the ViewManager.
+ *
+ * The native 'topChange' event is mapped to the 'onChange' prop automatically
+ * by React Native's event system. We expose it as 'onTap' for a cleaner API.
+ */
+function Button({ onTap, ...props }) {
+  const onChange = (event) => {
+    if (onTap) {
+      onTap(event.nativeEvent.message);
     }
-  }
+  };
 
-  render() {
-    return(
-      <ButtonView
-        {...this.props}
-        onChange={this.onChange}
-      />
-    );
-  }
+  return <ButtonView {...props} onChange={onChange} />;
 }
 
-const ButtonView = requireNativeComponent(
-  'ButtonView',
-  Button, {
-    nativeOnly: {
-      onChange: true
-    }
-  }
-);
+const ButtonView = requireNativeComponent('ButtonView');
+
+export default Button;
