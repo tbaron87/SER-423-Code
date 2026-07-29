@@ -1,49 +1,55 @@
-import React, { Component } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
-import Button from 'react-native-button';
-import TouchID from 'react-native-touch-id';
+import { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import * as LocalAuthentication from 'expo-local-authentication';
 
-export default class App extends Component {
-  state = {
-    authStatus: null
-  }
+export default function App() {
+  const [authStatus, setAuthStatus] = useState(null);
+  const [isCompatible, setIsCompatible] = useState(false);
 
-  authenticate = () => {
-    TouchID.authenticate('Access secret information!')
-      .then(this.handleAuthSuccess)
-      .catch(this.handleAuthFailure);
-  }
+  useEffect(() => {
+    checkCompatibility();
+  }, []);
 
-  handleAuthSuccess = () => {
-    this.setState({
-      authStatus: 'Authenticated'
+  const checkCompatibility = async () => {
+    // Check if the device has biometric hardware
+    const hasHardware = await LocalAuthentication.hasHardwareAsync();
+    // Check if biometrics are enrolled (e.g., fingerprint or face registered)
+    const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+    setIsCompatible(hasHardware && isEnrolled);
+  };
+
+  const authenticate = async () => {
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: 'Access secret information!',
+      fallbackLabel: 'Use passcode',
+      cancelLabel: 'Cancel',
     });
-  }
 
-  handleAuthFailure = () => {
-    this.setState({
-      authStatus: 'Not Authenticated'
-    });
-  }
+    if (result.success) {
+      setAuthStatus('Authenticated');
+    } else {
+      setAuthStatus('Not Authenticated');
+    }
+  };
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <Button
-          containerStyle={styles.buttonContainer}
-          style={styles.button}
-          onPress={this.authenticate}>
-          Authenticate
-        </Button>
-        <Text style={styles.label}>Authentication Status</Text>
-        <Text style={styles.welcome}>{this.state.authStatus}</Text>
-      </View>
-    );
-  }
+  return (
+    <View style={styles.container}>
+      {!isCompatible ? (
+        <Text style={styles.warning}>
+          Biometric authentication is not available on this device.
+        </Text>
+      ) : null}
+      <TouchableOpacity
+        style={[styles.button, !isCompatible ? styles.disabled : null]}
+        onPress={authenticate}
+        disabled={!isCompatible}
+      >
+        <Text style={styles.buttonText}>Authenticate</Text>
+      </TouchableOpacity>
+      <Text style={styles.label}>Authentication Status</Text>
+      <Text style={styles.status}>{authStatus}</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -53,26 +59,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
   },
-  welcome: {
+  button: {
+    backgroundColor: '#FF5722',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 5,
+  },
+  buttonText: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: '500',
+  },
+  disabled: {
+    backgroundColor: '#ccc',
+  },
+  label: {
+    textAlign: 'center',
+    color: '#333',
+    marginTop: 30,
+    marginBottom: 5,
+    fontSize: 14,
+  },
+  status: {
     fontSize: 20,
     textAlign: 'center',
     margin: 10,
   },
-  label: {
+  warning: {
+    color: '#e74c3c',
+    marginBottom: 20,
     textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
+    paddingHorizontal: 20,
   },
-  buttonContainer: {
-    width: 150,
-    padding: 10,
-    margin: 5,
-    height: 40,
-    overflow: 'hidden',
-    backgroundColor: '#FF5722'
-  },
-  button: {
-    fontSize: 16,
-    color: 'white'
-  }
 });

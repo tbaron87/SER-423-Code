@@ -1,25 +1,23 @@
 {
-  "name": "BiometricAuth",
-  "version": "0.0.1",
+  "name": "biometric-auth",
+  "version": "1.0.0",
+  "main": "expo/AppEntry.js",
   "private": true,
   "scripts": {
-    "start": "node node_modules/react-native/local-cli/cli.js start",
-    "test": "jest"
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
   },
   "dependencies": {
-    "react": "16.6.3",
-    "react-native": "0.58.3",
-    "react-native-button": "^2.3.0",
-    "react-native-touch-id": "^4.3.0"
+    "expo": "~52.0.0",
+    "expo-local-authentication": "~15.0.0",
+    "expo-status-bar": "~2.0.0",
+    "react": "18.3.1",
+    "react-native": "0.76.3"
   },
   "devDependencies": {
-    "babel-core": "^7.0.0-bridge.0",
-    "babel-jest": "24.0.0",
-    "jest": "24.0.0",
-    "metro-react-native-babel-preset": "0.51.1",
-    "react-test-renderer": "16.6.3"
-  },
-  "jest": {
-    "preset": "react-native"
+    "@babel/core": "^7.25.0",
+    "babel-preset-expo": "~12.0.0"
   }
 }
