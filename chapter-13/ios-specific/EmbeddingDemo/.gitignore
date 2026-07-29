@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# iOS generated files
+ios/Pods/
+ios/*.xcworkspace
+ios/*.xcodeproj
+ios/build/
+
+# Metro
+.metro-health-check*
+
+# Misc
+.DS_Store
+*.hmap
+*.ipa
