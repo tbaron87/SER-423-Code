@@ -1,33 +1,24 @@
-import React, { Component } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
+import { useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import Button from './components/Button';
 
-export default class App extends Component {
-  state = {
-    count: 0
-  }
+export default function App() {
+  const [count, setCount] = useState(0);
 
-  handleButtonTap = () => {
-    this.setState({
-      count: this.state.count + 1
-    });
-  }
+  const onButtonTap = () => {
+    setCount((prev) => prev + 1);
+  };
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <Button buttonText="Click Me!"
-        onTap={this.handleButtonTap}
+  return (
+    <View style={styles.container}>
+      <Button
+        buttonText="Press Me!"
+        onTap={onButtonTap}
         style={styles.button}
       />
-        <Text>Button Pressed Count: {this.state.count}</Text>
-      </View>
-    );
-  }
+      <Text style={styles.text}>Button Pressed Count: {count}</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -39,6 +30,10 @@ const styles = StyleSheet.create({
   },
   button: {
     height: 40,
-    width: 80
-  }
+    width: 150,
+  },
+  text: {
+    marginTop: 20,
+    fontSize: 18,
+  },
 });
