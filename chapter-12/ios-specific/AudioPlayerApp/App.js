@@ -1,54 +1,48 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   NativeModules,
-  NativeAppEventEmitter
+  NativeEventEmitter,
+  TouchableOpacity,
 } from 'react-native';
-import Button from 'react-native-button';
 
-const MediaManager = NativeModules.MediaManager;
+const { MediaManager } = NativeModules;
+const mediaEventEmitter = new NativeEventEmitter(MediaManager);
 
-export default class App extends Component {
-  state = {
-    currentSong: null
-  }
+/**
+ * This app demonstrates native-to-JS event communication on iOS:
+ * 1. JS calls MediaManager.showSongs() (native method)
+ * 2. iOS presents the MPMediaPickerController (system music picker)
+ * 3. User selects a song
+ * 4. Native code plays it with MPMusicPlayerController and emits a "SongPlaying" event
+ * 5. JS receives the event via NativeEventEmitter and displays song info
+ */
+export default function App() {
+  const [currentSong, setCurrentSong] = useState(null);
 
-  componentWillMount() {
-    this.subscription = NativeAppEventEmitter.addListener(
-      'SongPlaying',
-      this.updateCurrentlyPlaying
-    );
-  }
+  useEffect(() => {
+    const subscription = mediaEventEmitter.addListener('SongPlaying', (songTitle) => {
+      setCurrentSong(songTitle);
+    });
 
-  componentWillUnmount = () => {
-    this.subscription.remove();
-  }
+    return () => subscription.remove();
+  }, []);
 
-  updateCurrentlyPlaying = (currentSong) => {
-    this.setState({ currentSong });
-  }
-
-  showSongs() {
+  const showSongs = () => {
     MediaManager.showSongs();
-  }
+  };
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <Button
-          containerStyle={styles.buttonContainer}
-          style={styles.buttonStyle}
-          onPress={this.showSongs}>
-            Pick Song
-        </Button>
-
-        <Text style={styles.instructions}>Song Playing:</Text>
-        <Text style={styles.welcome}>{this.state.currentSong}</Text>
-      </View>
-    );
-  }
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.button} onPress={showSongs}>
+        <Text style={styles.buttonText}>Pick Song</Text>
+      </TouchableOpacity>
+      <Text style={styles.instructions}>Song Playing:</Text>
+      <Text style={styles.songTitle}>{currentSong}</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -58,27 +52,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
   },
-  welcome: {
+  songTitle: {
     fontSize: 20,
     textAlign: 'center',
     margin: 10,
   },
   instructions: {
     textAlign: 'center',
-    color: '#333333',
+    color: '#333',
+    marginTop: 20,
     marginBottom: 5,
   },
-  buttonContainer: {
-    width: 150,
-    padding: 10,
-    margin: 5,
-    height: 40,
-    overflow: 'hidden',
+  button: {
+    backgroundColor: '#3B5998',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 4,
-    backgroundColor: '#3B5998'
   },
-  buttonStyle: {
+  buttonText: {
     fontSize: 16,
-    color: '#fff'
-  }
+    color: '#fff',
+  },
 });
