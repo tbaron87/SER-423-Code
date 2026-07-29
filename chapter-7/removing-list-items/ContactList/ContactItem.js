@@ -30,13 +30,13 @@ export default function ContactItem({
       onPanResponderRelease: (e, gesture) => {
         const move = rowWidth.current - Math.abs(gesture.dx);
         let remove = false;
-        let config = { toValue: { x: 0, y: 0 }, duration: 500 };
+        let config = { toValue: { x: 0, y: 0 }, duration: 500, useNativeDriver: false };
 
         if (move < threshold.current) {
           remove = true;
           config = gesture.dx > 0
-            ? { toValue: { x: rowWidth.current, y: 0 }, duration: 100 }
-            : { toValue: { x: -rowWidth.current, y: 0 }, duration: 100 };
+            ? { toValue: { x: rowWidth.current, y: 0 }, duration: 100, useNativeDriver: false }
+            : { toValue: { x: -rowWidth.current, y: 0 }, duration: 100, useNativeDriver: false };
         }
 
         onDragEnd();
@@ -48,7 +48,7 @@ export default function ContactItem({
       },
       onPanResponderTerminate: (e, gesture) => {
         onDragEnd();
-        Animated.spring(pan, { toValue: { x: 0, y: 0 }, duration: 500 }).start();
+        Animated.spring(pan, { toValue: { x: 0, y: 0 }, duration: 500, useNativeDriver: false }).start();
       },
     })
   ).current;
