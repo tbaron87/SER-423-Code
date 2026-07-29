@@ -1,99 +1,68 @@
-import React, { Component } from 'react';
-import Modal from 'react-native-modalbox';
-import {
-  Text,
-  StyleSheet,
-  View,
-  TouchableOpacity
-} from 'react-native';
+import { useState } from 'react';
+import { Text, StyleSheet, View, TouchableOpacity } from 'react-native';
+import Modal from 'react-native-modal';
 
-export default class App extends Component {
-  state = {
-    isOpen: false,
-  };
+export default function App() {
+  const [isModal1Visible, setModal1Visible] = useState(false);
+  const [isModal2Visible, setModal2Visible] = useState(false);
 
-  onClose = () => {
-    console.log('modal is closed');
-  }
-
-  onOpen = () => {
-    console.log('modal is open');
-  }
-
-  openModal1 = () => {
-    this.refs.modal1.open();
-  }
-
-  openModal2 = () => {
-    this.setState({ isOpen: true });
-  }
-
-  onCloseModal2 = () => {
-    this.setState({ isOpen: false });
-  }
-
-  renderModal1 = () => {
-    return(
-      <Modal
-        style={[styles.modal, styles.modal1]}
-        ref={'modal1'}
-        onOpened={this.onOpen}
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity
+        onPress={() => setModal1Visible(true)}
+        style={styles.button}
       >
-        <Text style={styles.modalText}>
-          Hello from Modal 1
-        </Text>
-      </Modal>
-    )
-  }
+        <Text style={styles.buttonText}>Open Modal 1</Text>
+      </TouchableOpacity>
 
-  renderModal2 = () => {
-    return(
-      <Modal
-        style={[styles.modal, styles.modal2]}
-        position={'bottom'}
-        onOpened={this.onOpen}
-        onClosed={this.onCloseModal2}
-        isOpen={this.state.isOpen}
+      <TouchableOpacity
+        onPress={() => setModal2Visible(true)}
+        style={styles.button}
       >
-        <Text style={styles.modalText}>
-          Hello from Modal 2
-        </Text>
-        <TouchableOpacity
-          onPress={() => this.setState({isOpen: false})}
-          style={styles.button}
-        >
-          <Text style={styles.buttonText}>
-            OK
-          </Text>
-        </TouchableOpacity>
-      </Modal>
-    )
-  }
+        <Text style={styles.buttonText}>Open Modal 2</Text>
+      </TouchableOpacity>
 
-  render = () => {
-    return (
-      <View style={styles.container}>
-        <TouchableOpacity
-          onPress={this.openModal1}
-          style={styles.button}
-        >
-          <Text style={styles.buttonText}>
-            Open Modal 1
+      {/* Modal 1: Center modal with fade animation */}
+      <Modal
+        isVisible={isModal1Visible}
+        onBackdropPress={() => setModal1Visible(false)}
+        animationIn="fadeIn"
+        animationOut="fadeOut"
+      >
+        <View style={[styles.modal, styles.modal1]}>
+          <Text style={styles.modalText}>Hello from Modal 1</Text>
+          <TouchableOpacity
+            onPress={() => setModal1Visible(false)}
+            style={styles.modalButton}
+          >
+            <Text style={styles.modalButtonText}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+
+      {/* Modal 2: Bottom slide-up modal */}
+      <Modal
+        isVisible={isModal2Visible}
+        onBackdropPress={() => setModal2Visible(false)}
+        animationIn="slideInUp"
+        animationOut="slideOutDown"
+        style={styles.bottomModal}
+      >
+        <View style={[styles.modal, styles.modal2]}>
+          <Text style={styles.modalText}>Hello from Modal 2</Text>
+          <Text style={styles.modalSubText}>
+            This modal slides up from the bottom
           </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={this.openModal2}
-          style={styles.button}
-        >
-          <Text style={styles.buttonText}>
-            Open Modal 2
-          </Text>
-        </TouchableOpacity>
-        {this.renderModal1()}
-        {this.renderModal2()}
-      </View>
-    );
-  }
+          <TouchableOpacity
+            onPress={() => setModal2Visible(false)}
+            style={styles.modalButton}
+          >
+            <Text style={styles.modalButtonText}>OK</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -101,34 +70,54 @@ const styles = StyleSheet.create({
     backgroundColor: '#f6f6f6',
     justifyContent: 'center',
     alignItems: 'center',
-    flex: 1
+    flex: 1,
   },
   modal: {
-    width: 300,
+    borderRadius: 10,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    padding: 20,
   },
   modal1: {
     height: 200,
-    backgroundColor: "#4AC9B0"
+    backgroundColor: '#4AC9B0',
   },
   modal2: {
     height: 300,
-    backgroundColor: "#6CCEFF"
+    backgroundColor: '#6CCEFF',
+  },
+  bottomModal: {
+    justifyContent: 'flex-end',
+    margin: 0,
   },
   modalText: {
     fontSize: 25,
     padding: 10,
-    color: '#474747'
+    color: '#474747',
+  },
+  modalSubText: {
+    fontSize: 16,
+    color: '#474747',
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: '#000',
+    padding: 12,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  modalButtonText: {
+    fontSize: 18,
+    color: '#fff',
   },
   button: {
     backgroundColor: '#000',
     padding: 16,
     borderRadius: 10,
-    marginTop: 20
+    marginTop: 20,
   },
   buttonText: {
     fontSize: 30,
-    color: '#fff'
-  }
+    color: '#fff',
+  },
 });

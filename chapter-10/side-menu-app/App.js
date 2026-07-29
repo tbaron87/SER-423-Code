@@ -1,50 +1,54 @@
-import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity
-} from 'react-native';
-import SideMenu from 'react-native-side-menu';
+import { useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 
-import Menu from './components/Menu';
+const Drawer = createDrawerNavigator();
 
-export default class App extends React.Component {
-  state = {
-    isOpen: false,
-    selectedBackgroundColor: 'green'
-  }
+const colors = ['green', 'blue', 'orange', 'pink', 'cyan', 'yellow', 'purple'];
 
-  changeBackgroundColor = color => {
-    this.setState({
-      isOpen: false,
-      selectedBackgroundColor: color,
-    });
-  }
+function HomeScreen({ navigation, route }) {
+  const selectedColor = route.params?.color || 'green';
 
-  render() {
-    const menu = <Menu onColorSelected={this.changeBackgroundColor} />;
-
-    return (
-      <SideMenu
-        menu={menu}
-        isOpen={this.state.isOpen}
-        onChange={(isOpen) => this.setState({ isOpen })}
+  return (
+    <View style={[styles.container, { backgroundColor: selectedColor }]}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.openDrawer()}
       >
-        <View style={[
-          styles.container,
-          { backgroundColor: this.state.selectedBackgroundColor }
-        ]}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => this.setState({ isOpen: true })}
-          >
-            <Text style={styles.buttonText}>Open Menu</Text>
-          </TouchableOpacity>
-        </View>
-      </SideMenu>
-    );
-  }
+        <Text style={styles.buttonText}>Open Menu</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+function CustomDrawerContent({ navigation }) {
+  return (
+    <View style={styles.menu}>
+      <Text style={styles.heading}>Select a Color</Text>
+      {colors.map((color) => (
+        <TouchableOpacity
+          key={color}
+          onPress={() => navigation.navigate('Home', { color })}
+        >
+          <Text style={styles.item}>{color.charAt(0).toUpperCase() + color.slice(1)}</Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+}
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Drawer.Navigator
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
+        screenOptions={{ headerShown: false }}
+      >
+        <Drawer.Screen name="Home" component={HomeScreen} />
+      </Drawer.Navigator>
+    </NavigationContainer>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -56,10 +60,27 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: 'black',
     padding: 20,
-    borderRadius: 10
+    borderRadius: 10,
   },
   buttonText: {
     color: 'white',
-    fontSize: 25
-  }
+    fontSize: 25,
+  },
+  menu: {
+    flex: 1,
+    backgroundColor: '#3C3C3C',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  heading: {
+    fontSize: 22,
+    color: '#f6f6f6',
+    fontWeight: 'bold',
+    paddingBottom: 20,
+  },
+  item: {
+    fontSize: 25,
+    paddingTop: 10,
+    color: '#f6f6f6',
+  },
 });
