@@ -1,109 +1,117 @@
-import React, { Component } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity
-} from 'react-native';
-import Realm from 'realm';
+import { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native';
+import * as SQLite from 'expo-sqlite';
 
-export default class App extends Component {
-  realm;
-  state = {
-    users: []
-  }
+export default function App() {
+  const [db, setDb] = useState(null);
+  const [users, setUsers] = useState([]);
 
-  componentWillMount() {
-    const realm = this.realm = new Realm({
-      schema: [
-        {
-          name: 'User',
-          properties: {
-            firstName: 'string',
-            lastName: 'string',
-            email: 'string'
-          }
-        }
-      ]
-    });
-  }
+  useEffect(() => {
+    initDatabase();
+  }, []);
 
-  getRandomUser() {
-    return fetch('https://randomuser.me/api/')
-      .then(response => response.json());
-  }
+  const initDatabase = async () => {
+    const database = await SQLite.openDatabaseAsync('users.db');
 
-  createUser = () => {
-    const realm = this.realm;
-    this.getRandomUser().then((response) => {
-      const user = response.results[0];
-      const userName = user.name;
-      realm.write(() => {
-        realm.create('User', {
-          firstName: userName.first,
-          lastName: userName.last,
-          email: user.email
-        });
-        this.setState({ users: realm.objects('User') });
-      });
-    });
+    // Create the users table if it doesn't exist
+    await database.execAsync(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        firstName TEXT NOT NULL,
+        lastName TEXT NOT NULL,
+        email TEXT NOT NULL
+      );
+    `);
 
-    this.setState({ users: realm.objects('User') });
-  }
+    setDb(database);
+    await loadUsers(database);
+  };
 
-  updateUser = () => {
-    const realm = this.realm;
-    const users = realm.objects('User');
-    realm.write(() => {
-      if (users.length) {
-        let firstUser = users.slice(0, 1)[0];
-        firstUser.firstName = 'Bob';
-        firstUser.lastName = 'Cookbook';
-        firstUser.email = 'react.native@cookbook.com';
-        this.setState(users);
-      }
-    });
-  }
+  const loadUsers = async (database) => {
+    const dbRef = database || db;
+    if (!dbRef) return;
 
-  deleteUsers = () => {
-    const realm = this.realm;
-    realm.write(() => {
-      realm.deleteAll();
-      this.setState({ users: realm.objects('User') });
-    });
-  }
+    const result = await dbRef.getAllAsync('SELECT * FROM users');
+    setUsers(result);
+  };
 
-  render() {
-    const realm = this.realm;
-    return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to Realm DB Test!
-      </Text>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button}
-            onPress={this.createUser}>
-            <Text style={styles.buttontext}>Add User</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button}
-            onPress={this.updateUser}>
-            <Text>Update First User</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button}
-            onPress={this.deleteUsers}>
-            <Text>Remove All Users</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.container}>
-          <Text style={styles.welcome}>Users:</Text>
-          {this.state.users.map((user, idx) => {
-            return <Text key={idx}>{user.firstName} {user.lastName}
-              {user.email}</Text>;
-          })}
-        </View>
-      </View>
+  const getRandomUser = async () => {
+    const response = await fetch('https://randomuser.me/api/');
+    return response.json();
+  };
+
+  const createUser = async () => {
+    if (!db) return;
+
+    const data = await getRandomUser();
+    const user = data.results[0];
+
+    await db.runAsync(
+      'INSERT INTO users (firstName, lastName, email) VALUES (?, ?, ?)',
+      user.name.first,
+      user.name.last,
+      user.email
     );
-  }
+
+    await loadUsers();
+  };
+
+  const updateFirstUser = async () => {
+    if (!db || users.length === 0) return;
+
+    const firstUser = users[0];
+    await db.runAsync(
+      'UPDATE users SET firstName = ?, lastName = ?, email = ? WHERE id = ?',
+      'Bob',
+      'Cookbook',
+      'react.native@cookbook.com',
+      firstUser.id
+    );
+
+    await loadUsers();
+  };
+
+  const deleteAllUsers = async () => {
+    if (!db) return;
+
+    await db.runAsync('DELETE FROM users');
+    await loadUsers();
+  };
+
+  const renderUser = ({ item }) => (
+    <View style={styles.userRow}>
+      <Text style={styles.userName}>{item.firstName} {item.lastName}</Text>
+      <Text style={styles.userEmail}>{item.email}</Text>
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.welcome}>Welcome to SQLite DB Test!</Text>
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={createUser}>
+          <Text style={styles.buttonText}>Add User</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={updateFirstUser}>
+          <Text style={styles.buttonText}>Update First User</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={deleteAllUsers}>
+          <Text style={styles.buttonText}>Remove All Users</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.listContainer}>
+        <Text style={styles.listTitle}>Users ({users.length}):</Text>
+        <FlatList
+          data={users}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={renderUser}
+          style={styles.list}
+        />
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -111,17 +119,56 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f6f6f6',
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingTop: 60,
+  },
+  welcome: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 20,
   },
   buttonContainer: {
-    flex: 1,
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'flex-end',
   },
   button: {
     backgroundColor: '#67CAFF',
     padding: 15,
-    margin: 10
-  }
+    margin: 5,
+    borderRadius: 5,
+    width: 200,
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  listContainer: {
+    flex: 1,
+    width: '100%',
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  listTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  list: {
+    flex: 1,
+  },
+  userRow: {
+    backgroundColor: '#fff',
+    padding: 12,
+    marginBottom: 5,
+    borderRadius: 5,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  userEmail: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 2,
+  },
 });
