@@ -1,4 +1,34 @@
 {
-  "name": "TestDeployApp",
-  "displayName": "TestDeployApp"
+  "expo": {
+    "name": "test-deploy-app",
+    "slug": "test-deploy-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/YOUR_PROJECT_ID_HERE"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
+  }
 }
