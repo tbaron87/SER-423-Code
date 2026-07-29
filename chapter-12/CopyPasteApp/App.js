@@ -1,66 +1,50 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import {
   StyleSheet,
   Text,
   View,
-  Clipboard,
-  TextInput
+  TextInput,
+  TouchableOpacity,
 } from 'react-native';
-import Button from 'react-native-button';
+import * as Clipboard from 'expo-clipboard';
 
-export default class App extends Component {
-  state = {
-    clipboardContent: null
-  }
+const SOURCE_TEXT = 'React Native Cookbook';
 
-  copyToClipboard = () => {
-    const sourceText = this.refs.sourceText.props.children;
-    Clipboard.setString(sourceText);
-  }
+export default function App() {
+  const [clipboardContent, setClipboardContent] = useState('');
 
-  getClipboardContent = async () => {
-    const clipboardContent = await Clipboard.getString();
-    this.setState({
-      clipboardContent
-    });
-  }
+  const copyToClipboard = async () => {
+    await Clipboard.setStringAsync(SOURCE_TEXT);
+  };
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.instructions}>
-          Tap and Hold the next line to copy it to the Clipboard:
-        </Text>
-        <Text
-          ref="sourceText"
-          onLongPress={this.copyToClipboard}
-        >
-          React Native Cookbook
-        </Text>
-        <Text style={styles.instructions}>
-          Input some text into the TextInput below and Cut/Copy as you normally would:
-        </Text>
-        <TextInput style={styles.textInput} />
-        <View style={styles.row}>
-          <Text style={styles.rowText}>
-            Clipboard Contents:
-          </Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.content}>
-            {this.state.clipboardContent}
-          </Text>
-        </View>
-        <Button
-          containerStyle={styles.buttonContainer}
-          style={styles.buttonStyle}
-          onPress={this.getClipboardContent}
-        >
-            Paste Clipboard
-        </Button>
+  const getClipboardContent = async () => {
+    const content = await Clipboard.getStringAsync();
+    setClipboardContent(content);
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.instructions}>
+        Tap and Hold the next line to copy it to the Clipboard:
+      </Text>
+      <Text selectable onLongPress={copyToClipboard} style={styles.sourceText}>
+        {SOURCE_TEXT}
+      </Text>
+      <Text style={styles.instructions}>
+        Input some text into the TextInput below and Cut/Copy as you normally would:
+      </Text>
+      <TextInput style={styles.textInput} placeholder="Type here..." />
+      <View style={styles.row}>
+        <Text style={styles.rowText}>Clipboard Contents:</Text>
       </View>
-    );
-  }
+      <View style={styles.row}>
+        <Text style={styles.content}>{clipboardContent}</Text>
+      </View>
+      <TouchableOpacity style={styles.button} onPress={getClipboardContent}>
+        <Text style={styles.buttonText}>Paste Clipboard</Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -72,40 +56,44 @@ const styles = StyleSheet.create({
   },
   instructions: {
     textAlign: 'center',
-    color: '#333333',
+    color: '#333',
     margin: 10,
+  },
+  sourceText: {
+    fontSize: 16,
+    fontWeight: '500',
+    padding: 10,
   },
   content: {
     fontSize: 18,
-    marginLeft : 5,
-    marginRight : 5
+    marginHorizontal: 5,
   },
   textInput: {
     backgroundColor: 'white',
     height: 40,
     width: 250,
-    marginLeft: 20,
-    marginRight: 20
+    marginHorizontal: 20,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    paddingHorizontal: 10,
   },
   row: {
     flexDirection: 'row',
     marginTop: 20,
-    marginBottom: 20
+    marginBottom: 20,
   },
   rowText: {
-    color: '#333333'
+    color: '#333',
   },
-  buttonContainer: {
-    width: 150,
-    padding: 10,
-    margin: 5,
-    height: 40,
-    overflow: 'hidden',
+  button: {
+    backgroundColor: '#FF5722',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 4,
-    backgroundColor: '#FF5722'
   },
-  buttonStyle: {
+  buttonText: {
     fontSize: 16,
-    color: 'white'
-  }
+    color: '#fff',
+  },
 });
