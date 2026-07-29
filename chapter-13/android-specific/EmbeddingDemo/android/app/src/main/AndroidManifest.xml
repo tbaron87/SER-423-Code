@@ -1,0 +1,46 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:name=".MainApplication"
+        android:label="@string/app_name"
+        android:allowBackup="false"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
+
+        <!-- Launcher: menu to pick a recipe -->
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Recipe 1: Basic embedding -->
+        <activity android:name=".BasicEmbedActivity" android:exported="false" />
+
+        <!-- Recipe 2: Native → RN communication -->
+        <activity android:name=".NativeToRNActivity" android:exported="false" />
+
+        <!-- Recipe 3: RN → Native communication -->
+        <activity android:name=".RNToNativeActivity" android:exported="false" />
+
+        <!-- Recipe 4: Deep link handling -->
+        <activity
+            android:name=".DeepLinkActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="embeddingdemo" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>
