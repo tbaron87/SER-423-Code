@@ -1,22 +1,22 @@
 {
-  "name": "HiddenContentApp",
-  "version": "0.0.1",
+  "name": "hidden-content-app",
+  "version": "1.0.0",
+  "main": "expo/AppEntry.js",
   "private": true,
   "scripts": {
-    "start": "node node_modules/react-native/local-cli/cli.js start",
-    "test": "jest"
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
   },
   "dependencies": {
-    "react": "16.4.1",
-    "react-native": "0.56.0"
+    "expo": "~52.0.0",
+    "expo-status-bar": "~2.0.0",
+    "react": "18.3.1",
+    "react-native": "0.76.3"
   },
   "devDependencies": {
-    "babel-jest": "23.2.0",
-    "babel-preset-react-native": "^5",
-    "jest": "23.3.0",
-    "react-test-renderer": "16.4.1"
-  },
-  "jest": {
-    "preset": "react-native"
+    "@babel/core": "^7.25.0",
+    "babel-preset-expo": "~12.0.0"
   }
 }
