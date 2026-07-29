@@ -1,70 +1,66 @@
-import React, { Component } from 'react';
+import { useEffect } from 'react';
 import {
   StyleSheet,
   Text,
   View,
-  SafeAreaView,
   ScrollView,
   Image,
   TouchableOpacity,
-  Platform
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import randomColor from 'randomcolor';
-import { connect } from 'react-redux';
-import {
-  fetchPhotos,
-  addPhoto,
-  removePhoto
-} from '../../redux/photos/actions';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchPhotos, addPhoto, removePhoto } from '../../redux/photos/photosSlice';
 
-const android = Platform.OS === 'android' ? { paddingTop: 24 } : {};
+export default function Album() {
+  const photos = useSelector((state) => state.photos.loadedPhotos);
+  const status = useSelector((state) => state.photos.status);
+  const dispatch = useDispatch();
 
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchPhotos());
+    }
+  }, [status, dispatch]);
 
-class Album extends Component {
-  componentWillMount() {
-    setTimeout(() => {
-      this.props.fetchPhotos();
-    }, 2000);
-  }
-
-  addPhoto = () => {
+  const handleAddPhoto = () => {
     const photo = {
-      "albumId": 2,
-      "title": "dolore esse a in eos sed",
-      "url": `http://placehold.it/600/${randomColor().replace('#', '')}`,
-      "thumbnailUrl": `http://placehold.it/150/${randomColor().replace('#', '')}`
+      albumId: 2,
+      title: 'dolore esse a in eos sed',
+      url: `https://placehold.co/600x600/${randomColor().replace('#', '')}/white`,
+      thumbnailUrl: `https://placehold.co/150x150/${randomColor().replace('#', '')}/white`,
     };
-    this.props.addPhoto(photo);
-  }
+    dispatch(addPhoto(photo));
+  };
 
-  removePhoto = (id) => {
-    this.props.removePhoto(id);
-  }
+  const handleRemovePhoto = (id) => {
+    dispatch(removePhoto(id));
+  };
 
-  render() {
-    return (
-      <SafeAreaView style={[styles.container, android]}>
-        <Text style={styles.toolbar}>Album</Text>
-        <ScrollView>
-          <View style={styles.imageContainer}>
-            <TouchableOpacity style={styles.button} onPress={this.addPhoto}>
-              <Text style={styles.buttonText}>Add Photo</Text>
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.toolbar}>Album</Text>
+      <ScrollView>
+        <View style={styles.imageContainer}>
+          <TouchableOpacity style={styles.button} onPress={handleAddPhoto}>
+            <Text style={styles.buttonText}>Add Photo</Text>
+          </TouchableOpacity>
+          {status === 'loading' ? (
+            <Text style={styles.loadingText}>Loading photos...</Text>
+          ) : null}
+          {photos.map((photo) => (
+            <TouchableOpacity
+              onPress={() => handleRemovePhoto(photo.id)}
+              key={photo.id}
+            >
+              <Image style={styles.image} source={{ uri: photo.url }} />
             </TouchableOpacity>
-            {this.props.photos ? this.props.photos.map((photo) => {
-              return(
-                <TouchableOpacity onPress={() => this.removePhoto(photo.id)} key={Math.random()}>
-                  <Image style={styles.image}
-                    source={{ uri: photo.url }}
-                  />
-                </TouchableOpacity>
-              );
-            }) : null}
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    );
-  }
-};
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -86,31 +82,22 @@ const styles = StyleSheet.create({
   },
   image: {
     height: 300,
-    width: 300
+    width: 300,
+    marginBottom: 10,
   },
   button: {
     margin: 10,
     padding: 20,
-    backgroundColor: '#3498db'
+    backgroundColor: '#3498db',
+    borderRadius: 5,
   },
   buttonText: {
     fontSize: 18,
-    color: '#fff'
-  }
+    color: '#fff',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
+    padding: 20,
+  },
 });
-
-const mapStateToProps = (state) => {
-  return {
-    photos: state.photos.loadedPhotos
-  }
-}
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    fetchPhotos: () => dispatch(fetchPhotos()),
-    addPhoto: (photo) => dispatch(addPhoto(photo)),
-    removePhoto: (id) => dispatch(removePhoto(id))
-  }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(Album);
