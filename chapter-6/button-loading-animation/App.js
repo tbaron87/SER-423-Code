@@ -3,10 +3,10 @@ import {
   Text,
   StyleSheet,
   View,
-  SafeAreaView,
   Platform,
   UIManager,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from './Button';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {

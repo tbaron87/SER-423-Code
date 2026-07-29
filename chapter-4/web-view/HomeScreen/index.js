@@ -1,4 +1,5 @@
-import { TouchableOpacity, View, Text, SafeAreaView } from 'react-native';
+import { TouchableOpacity, View, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from './styles';
 
 const links = [

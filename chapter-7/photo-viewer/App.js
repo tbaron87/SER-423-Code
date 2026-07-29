@@ -3,8 +3,8 @@ import {
   Text,
   ScrollView,
   StyleSheet,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import PostContainer from './PostContainer';
 import PhotoViewer from './PhotoViewer';
 

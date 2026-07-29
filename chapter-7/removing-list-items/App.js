@@ -1,4 +1,5 @@
-import { Text, StyleSheet, SafeAreaView } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import ContactList from './ContactList';
 
 export default function App() {

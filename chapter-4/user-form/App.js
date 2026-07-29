@@ -1,4 +1,5 @@
-import { StyleSheet, ScrollView, SafeAreaView, Text } from 'react-native';
+import { StyleSheet, ScrollView, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import UserForm from './UserForm';
 
 export default function App() {
